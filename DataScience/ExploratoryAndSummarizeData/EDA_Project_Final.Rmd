@@ -1,6 +1,13 @@
 Prosper Loan Data Exploration by Mark Mavromatis
 ========================================================
 
+```{r global_options, include=FALSE} 
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/', echo=FALSE, warning=FALSE, message=FALSE)
+
+```
+
+
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using
 # in your analysis in this code chunk.
@@ -25,8 +32,15 @@ library(lubridate)
 
 ```{r echo=FALSE, Load_the_Data}
 # Load the Data
-targetFolder <- "/Users/markmavromatis/Library/Mobile Documents/com~apple~CloudDocs/Udacity/Data Science/Exploratory Data Analysis"
-setwd(targetFolder)
+# Prosper loan data in .csv format is provided at this URL:
+# https://www.google.com/url?q=https://s3.amazonaws.com/udacity-hosted-downloads
+# /ud651/prosperLoanData.csv&sa=D&ust=1456946031971000&usg=AFQjCNFksliX1NjLhdYiI
+# ToeIQAJEWfzCA
+targetFolder <- paste("/Users/markmavromatis/Library/Mobile Documents/",
+    "com~apple~CloudDocs/Udacity/Data Science/Exploratory Data Analysis", 
+    sep = "")
+
+ setwd(targetFolder)
 rm(prosperLoans)
 prosperLoans <- read.csv("prosperLoanData.csv")
 
@@ -40,36 +54,47 @@ prosperLoans <- read.csv("prosperLoanData.csv")
 Some data has been parsed incorrectly: i.e. dates as factors, prosper scores as integers (instead of factors), etc.
 We should clean this up so that the data is easier to work with.
 
-```{r}
+```{r echo=FALSE, Fix_Parsing_Issues}
 # Convert prosper rating to a factor
-prosperLoans$ProsperRating..numeric. <- factor(prosperLoans$ProsperRating..numeric.)
+prosperLoans$ProsperRating..numeric. <- factor(
+    prosperLoans$ProsperRating..numeric.)
 
 # Convert prosper score to a factor
 prosperLoans$ProsperScore <- factor(prosperLoans$ProsperScore)
 
 # Convert Listing Category to a factor
-prosperLoans$ListingCategory..numeric. <- factor(prosperLoans$ListingCategory..numeric.)
+prosperLoans$ListingCategory..numeric. <- factor(
+    prosperLoans$ListingCategory..numeric.)
 
 # Convert Loan Origination Date from factor to a date
-prosperLoans$LoanOriginationDate <- as.Date(prosperLoans$LoanOriginationDate, format="%Y-%m-%d")
+prosperLoans$LoanOriginationDate <- as.Date(prosperLoans$LoanOriginationDate,
+    format="%Y-%m-%d")
 
 # Convert Listing Creation Date from factor to a date
-prosperLoans$ListingCreationDate <- as.Date(prosperLoans$ListingCreationDate, format="%Y-%m-%d")
+prosperLoans$ListingCreationDate <- as.Date(prosperLoans$ListingCreationDate, 
+    format="%Y-%m-%d")
 
 # Convert Closed Date from factor to a date
 prosperLoans$ClosedDate <- as.Date(prosperLoans$ClosedDate, format="%Y-%m-%d")
 
 # Convert Term column to a factor
-# Term column is an integer. We should convert this to a factor (12/36/60 months)
+# Term column (12/36/60) is an integer. We should convert this to a factor.
 prosperLoans$Term <- factor(prosperLoans$Term)
 
 # Reorder credit grade levels so that AA appears first instead of second
 prosperLoans$CreditGrade <- relevel(prosperLoans$CreditGrade, "AA")
 
 # Convert origination quarter to ordered factor
-prosperLoans$LoanOriginationQuarter <- ordered(prosperLoans$LoanOriginationQuarter, levels = c("Q4 2005","Q1 2006","Q2 2006","Q3 2006","Q4 2006","Q1 2007","Q2 2007","Q3 2007","Q4 2007","Q1 2008","Q2 2008","Q3 2008","Q4 2008","Q1 2009","Q2 2009","Q3 2009","Q4 2009","Q1 2010","Q2 2010","Q3 2010","Q4 2010","Q1 2011","Q2 2011","Q3 2011","Q4 2011","Q1 2012","Q2 2012","Q3 2012","Q4 2012","Q1 2013","Q2 2013","Q3 2013","Q4 2013","Q1 2014","Q2 2014","Q3 2014","Q4 2014"))
+prosperLoans$LoanOriginationQuarter <- ordered(
+    prosperLoans$LoanOriginationQuarter, levels = c("Q4 2005","Q1 2006",
+    "Q2 2006","Q3 2006","Q4 2006","Q1 2007","Q2 2007","Q3 2007","Q4 2007",
+    "Q1 2008","Q2 2008","Q3 2008","Q4 2008","Q1 2009","Q2 2009","Q3 2009",
+    "Q4 2009","Q1 2010","Q2 2010","Q3 2010","Q4 2010","Q1 2011","Q2 2011",
+    "Q3 2011","Q4 2011","Q1 2012","Q2 2012","Q3 2012","Q4 2012","Q1 2013",
+    "Q2 2013","Q3 2013","Q4 2013","Q1 2014","Q2 2014","Q3 2014","Q4 2014"))
 
-# Estimated Loss (Rate) is a very precise number. For purposes of "buckets" in our plots, let's round to 2- and 3- digits.
+# Estimated Loss (Rate) is a very precise number. For purposes of "buckets" 
+# in our plots, let's round to 2- and 3- digits.
 prosperLoans$EstimatedLossRounded2 <- round(prosperLoans$EstimatedLoss, 2)
 prosperLoans$EstimatedLossRounded3 <- round(prosperLoans$EstimatedLoss, 3)
 
@@ -80,8 +105,9 @@ prosperLoans$BorrowerAPRRounded2 = round(prosperLoans$BorrowerAPR, 2)
 ```
 
 
-## Helper methods for calculating loan maturity date and merging credit rating fields
-```{r}
+```{r echo=FALSE, Helper_Functions}
+
+# Helper methods for calculating loan maturity date and merging credit rating fields
 
 # Calculate maturity date from the start date and term of loan.
 get_maturity_date <- function(start_date, term) {
@@ -97,8 +123,9 @@ generateUdacityRating <- function(creditGrade, prosperRatingAlpha) {
   tempRating = ""
   tempRating = ifelse(creditGrade == "", prosperRatingAlpha , creditGrade)
   tempRating = ifelse(tempRating == "NC", "HR", tempRating)
-  tempRatingAsNumber = ifelse(tempRating == 'AA', 7, ifelse(tempRating == 'A',6, ifelse(tempRating == 'B', 5, 
-      ifelse(tempRating == 'C', 4, ifelse(tempRating == 'D', 3, ifelse(tempRating == 'E', 2, 1))))))
+  tempRatingAsNumber = ifelse(tempRating == 'AA', 7, ifelse(tempRating == 'A',
+      6, ifelse(tempRating == 'B', 5, ifelse(tempRating == 'C', 4, ifelse(
+      tempRating == 'D', 3, ifelse(tempRating == 'E', 2, 1))))))
   return(tempRatingAsNumber)
 }
 
@@ -110,45 +137,65 @@ getNumberFromFactor <- function(numericFactor) {
 ```
 
 
-## Add helper columns
 
-```{r}
-# To distinguish custom columns from the original dataset columns, we will preface added column names with "Udacity"
+```{r echo=FALSE, Custom_Column_Declarations}
+# To distinguish custom columns from the original dataset columns, we will 
+# prefix added column names with "Udacity"
 
 # Is the loan in default (customer unable to pay)
-prosperLoans$UdacityInDefault = ifelse(prosperLoans$LoanStatus == "Chargedoff" | prosperLoans$LoanStatus == "Defaulted" , 1 , 0)
+prosperLoans$UdacityInDefault = ifelse(prosperLoans$LoanStatus == "Chargedoff"
+    | prosperLoans$LoanStatus == "Defaulted" , 1 , 0)
 prosperLoans$UdacityInDefaultFactor = factor(prosperLoans$UdacityInDefault)
 
 
 # For defaults, what percentage of loan principal remains unpaid?
-prosperLoans$UdacityDefaultPrincipalUnpaidPercent <- ifelse(prosperLoans$UdacityInDefault == 1, (1 - prosperLoans$LP_CustomerPrincipalPayments / prosperLoans$LoanOriginalAmount),0)
+prosperLoans$UdacityDefaultPrincipalUnpaidPercent <- ifelse(
+    prosperLoans$UdacityInDefault == 1, (1 - 
+    prosperLoans$LP_CustomerPrincipalPayments / prosperLoans$LoanOriginalAmount
+    ),0)
 
 
-# Prosper used different fields to rate borrower credit. Pre-2009 = CreditGrade, Post-2009 = ProsperRating.
+# Prosper used different fields to rate borrower credit. Pre-2009 = 
+# CreditGrade, Post-2009 = ProsperRating.
 # This field merges the two fields taking the newer field if available.
-prosperLoans$UdacityRating = generateUdacityRating(as.character(prosperLoans$CreditGrade), as.character(prosperLoans$ProsperRating..Alpha.))
+prosperLoans$UdacityRating = generateUdacityRating(as.character(
+    prosperLoans$CreditGrade), as.character(prosperLoans$ProsperRating..Alpha.
+    ))
 prosperLoans$UdacityRating <- factor(prosperLoans$UdacityRating)
-prosperLoans$UdacityRatingAsNumber <- getNumberFromFactor(prosperLoans$UdacityRating)
+prosperLoans$UdacityRatingAsNumber <- getNumberFromFactor(
+    prosperLoans$UdacityRating)
 
-# How much does Prosper predict investors will lose on their principal on this category of loans (based on forecast
+# How much does Prosper predict investors will lose on their principal on this
+# category of loans (based on forecast
 # loss rate and principal)?
-prosperLoans$UdacityEstimatedLossAmount = ifelse(is.na(prosperLoans$EstimatedLoss),0,prosperLoans$EstimatedLoss * prosperLoans$LoanOriginalAmount)
+prosperLoans$UdacityEstimatedLossAmount = ifelse(is.na(
+    prosperLoans$EstimatedLoss),0,prosperLoans$EstimatedLoss * 
+    prosperLoans$LoanOriginalAmount)
 
-prosperLoans$UdacityMaturityDate <- get_maturity_date(prosperLoans$LoanOriginationDate, prosperLoans$Term)
+prosperLoans$UdacityMaturityDate <- get_maturity_date(
+    prosperLoans$LoanOriginationDate, prosperLoans$Term)
 
 # For paid off loans, was the loan paid ahead of schedule?
 # This is a "problem" for investors who are expecting a steady stream of income
-prosperLoans$UdacityIsPrepaid <- ifelse(prosperLoans$LoanStatus == "Completed" & prosperLoans$ClosedDate < prosperLoans$UdacityMaturityDate,1,0)
+prosperLoans$UdacityIsPrepaid <- ifelse(prosperLoans$LoanStatus == "Completed" 
+    & prosperLoans$ClosedDate < prosperLoans$UdacityMaturityDate,1,0)
 
 
-# Prosper has numerous statuses that are difficult to visualize on a chart. Let's add an alternate status field for charting.
+# Prosper has numerous statuses that are difficult to visualize on a chart. 
+# Let's add an alternate status field for charting.
 # ClosedPrepaid: Completed before maturity
 # ClosedPositive: Cancelled, Completed
 # ClosedNegative: Defaulted, Chargedoff
 # OpenPositive: Current, FinalPaymentInProgress
 # OpenNegative: PastDue*
-prosperLoans$UdacityLoanStatusVisual <- ifelse(prosperLoans$UdacityIsPrepaid == 1,"ClosedPrepaid", ifelse( prosperLoans$LoanStatus=="Cancelled" | prosperLoans$LoanStatus=="Completed", "ClosedPositive", ifelse(prosperLoans$UdacityInDefault == 1, "ClosedNegative", ifelse(prosperLoans$LoanStatus == "Current" | prosperLoans$LoanStatus == "FinalPaymentInProgress", "OpenPositive", "OpenNegative"))))
-prosperLoans$UdacityLoanStatusVisual <- factor(prosperLoans$UdacityLoanStatusVisual)
+prosperLoans$UdacityLoanStatusVisual <- ifelse(prosperLoans$UdacityIsPrepaid 
+    == 1,"ClosedPrepaid", ifelse( prosperLoans$LoanStatus=="Cancelled" | 
+    prosperLoans$LoanStatus=="Completed", "ClosedPositive", ifelse(
+    prosperLoans$UdacityInDefault == 1, "ClosedNegative", ifelse(
+    prosperLoans$LoanStatus == "Current" | prosperLoans$LoanStatus == 
+    "FinalPaymentInProgress", "OpenPositive", "OpenNegative"))))
+prosperLoans$UdacityLoanStatusVisual <- factor(
+    prosperLoans$UdacityLoanStatusVisual)
 
 
 # Create separate variable to hold defaulted loans
@@ -199,7 +246,7 @@ Ok this explains the gap.
 
 ### Daily loan amounts
 ```{r}
-ggplot(aes(x = LoanOriginationDate, y = LoanOriginalAmount), data=prosperLoans) +
+ggplot(aes(x = LoanOriginationDate, y = LoanOriginalAmount), data=prosperLoans)+
   geom_line(stat = 'summary', fun.y = "mean") + 
   labs(title = "Mean loan amount over time") +
   geom_smooth()
@@ -211,7 +258,7 @@ Both the number of loans and loan amounts (aside from the interruption in 2008) 
 
 # Plot total loan amounts over time
 ```{r}
-ggplot(aes(x = LoanOriginationDate, y = LoanOriginalAmount), data=prosperLoans) +
+ggplot(aes(x = LoanOriginationDate, y = LoanOriginalAmount), data=prosperLoans)+
   geom_line(stat = 'summary', fun.y = "sum") + 
   labs(title = "Total loan amount over time") +
   geom_smooth()
@@ -223,10 +270,13 @@ The daily amounts have peaks and valleys that make the plots tough to look at. U
 ```{r}
 
 loan_quarter_groups <- group_by(prosperLoans, LoanOriginationQuarter)
-prosper_loans_by_quarter <- summarise(loan_quarter_groups, total_loan_amount = sum(LoanOriginalAmount), mean_loan_amount = mean(LoanOriginalAmount), count = n(), count_default = sum(UdacityInDefault))
+prosper_loans_by_quarter <- summarise(loan_quarter_groups, total_loan_amount =
+    sum(LoanOriginalAmount), mean_loan_amount = mean(LoanOriginalAmount), 
+    count = n(), count_default = sum(UdacityInDefault))
 
-ggplot(aes(x = LoanOriginationQuarter, y = LoanOriginalAmount), data=prosperLoans) + geom_bar(stat = 'identity') +
-labs(title = "Total loan amount over time") 
+ggplot(aes(x = LoanOriginationQuarter, y = LoanOriginalAmount), 
+    data=prosperLoans) + geom_bar(stat = 'identity') + 
+    labs(title = "Total loan amount over time") 
 
 ```
 
@@ -245,9 +295,10 @@ ggplot(prosperLoans, aes(LoanOriginationDate, fill=LoanStatus)) +
 
 So many (12!) statuses! It is difficult to read so many different statuses on a stacked bar chart. Let's redraw this using a new "Visual Status" field that summarizes status into positive (current, paid off, prepaid) and negative (late payments, loan default) buckets.
 ```{r}
-  ggplot(prosperLoans, aes(x = LoanOriginationDate, fill = UdacityLoanStatusVisual)) +
-  geom_histogram() +
-  labs(title = "Loan Status Breakdown (by Quarter)")
+  ggplot(prosperLoans, aes(x = LoanOriginationDate, fill = 
+      UdacityLoanStatusVisual)) +
+      geom_histogram() +
+      labs(title = "Loan Status Breakdown (by Quarter)")
 
 ```
 
@@ -258,10 +309,12 @@ One point of interest is that there are many prepaid (Status is complete, Close 
 
 ```{r}
 
-  # It seems many of these loans are prepaid. What is the comparison between loans completed at maturity versus those which are prepaid?
-  ggplot(prosperLoans[prosperLoans$LoanStatus == "Completed",], aes(x = LoanOriginationDate, fill = UdacityLoanStatusVisual)) +
-  geom_histogram() +
-  labs(title = "Loan Status Breakdown (by OriginationDate)")
+  # It seems many of these loans are prepaid. What is the comparison between 
+  # loans completed at maturity versus those which are prepaid?
+  ggplot(prosperLoans[prosperLoans$LoanStatus == "Completed",], aes(
+      x = LoanOriginationDate, fill = UdacityLoanStatusVisual)) +
+      geom_histogram() +
+      labs(title = "Loan Status Breakdown (by OriginationDate)")
 ```
 
 Most of the completed loans, even dating back to 2008, are prepaid. This is troubling for Prosper investors (loan buyers)  who may expect a steady stream of payments up until the maturity of the loan.
@@ -273,7 +326,8 @@ Loans may be prepaid for a variety of reasons including reduction in interest ra
 ## What are the common loan sizes for Prosper Loans?
 ```{r}
 # What are the common sizes for loans?
-ggplot(aes(x = LoanOriginalAmount), data=prosperLoans) + geom_histogram(binwidth = 1000) +
+ggplot(aes(x = LoanOriginalAmount), data=prosperLoans) + 
+    geom_histogram(binwidth = 1000) +
     scale_x_continuous(breaks = seq(0, 30000, 5000))
   
 summary(prosperLoans$LoanOriginalAmount)
@@ -328,7 +382,10 @@ Interest rates range from 0.6% to 51.2%! Mean interest rate is 21.9%.
 51.2%? This seems exceptionally high. What kinds of borrowers have to pay interest of more than 50%?
 
 ```{r}
-prosperLoans[!is.na(prosperLoans$BorrowerAPR) & prosperLoans$BorrowerAPR > 0.5,][c("LoanOriginationDate","ClosedDate","CreditGrade","IsBorrowerHomeowner","BorrowerAPR","LoanOriginalAmount","LoanStatus","StatedMonthlyIncome")]
+prosperLoans[!is.na(prosperLoans$BorrowerAPR) & prosperLoans$BorrowerAPR > 0.5,
+    ][c("LoanOriginationDate","ClosedDate","CreditGrade", 
+    "IsBorrowerHomeowner", "BorrowerAPR","LoanOriginalAmount", "LoanStatus",
+    "StatedMonthlyIncome")]
 ```
 
 
@@ -341,13 +398,14 @@ Additionally, the borrowers were not homeowners and had low stated monthly incom
 With a large binwidth (5%), the histogram looks similar to a normal distribution. However, if we reduce the BorrowerRate APR binwidth to 1%, the graph shows more widely distributed interest rates.
 
 ```{r}
- ggplot(prosperLoans, aes(x=BorrowerAPR)) +
-  geom_histogram(binwidth = 0.01) +
-  labs(title = "Borrower APR for Prosper Loans (BinWidth = 0.01)") +
-  scale_x_continuous(breaks = seq(0.00,.5,0.05), labels = c('0%','5%','10%','15%','20%','25%','30%','35%','40%','45%','50%')) 
+ggplot(prosperLoans, aes(x=BorrowerAPR)) +
+    geom_histogram(binwidth = 0.01) +
+    labs(title = "Borrower APR for Prosper Loans (BinWidth = 0.01)") +
+    scale_x_continuous(breaks = seq(0.00,.5,0.05), labels = c('0%','5%','10%',
+    '15%','20%','25%','30%','35%','40%','45%','50%')) 
 
-
- paste("# of Loans with Borrower APR between 35% and 36%: ", nrow(prosperLoans[prosperLoans$BorrowerAPR >= 0.35 & prosperLoans$BorrowerAPR < 0.36,]))
+paste("# of Loans with Borrower APR between 35% and 36%: ", nrow(prosperLoans[
+    prosperLoans$BorrowerAPR >= 0.35 & prosperLoans$BorrowerAPR < 0.36,]))
 ```
 
 Here, the distribution appears wider with multiple peaks including more than 7000 loans between 35 and 36%. 
@@ -356,9 +414,10 @@ Here, the distribution appears wider with multiple peaks including more than 700
 
 ```{r}
 
-ggplot(prosperLoans[prosperLoans$UdacityInDefault == 1,], aes(UdacityDefaultPrincipalUnpaidPercent)) +
-  geom_histogram(binwidth = 0.1) +
-  labs(title = "Loss %")
+ggplot(prosperLoans[prosperLoans$UdacityInDefault == 1,], 
+    aes(UdacityDefaultPrincipalUnpaidPercent)) +
+    geom_histogram(binwidth = 0.1) +
+    labs(title = "Loss %")
  
 ```
 
@@ -366,7 +425,8 @@ Most defaults happen with >75% of the principal still left unpaid.
 
 ## What is the term breakdown for Prosper loans?
 ```{r}
-ggplot(aes(x = getNumberFromFactor(Term)), data=prosperLoans) + geom_histogram() +
+ggplot(aes(x = getNumberFromFactor(Term)), data=prosperLoans) +
+    geom_histogram() +
     scale_x_continuous(breaks = c(12,36,60))
 
 ```
@@ -375,8 +435,10 @@ ggplot(aes(x = getNumberFromFactor(Term)), data=prosperLoans) + geom_histogram()
 
 12-month loans do not appear to be popular. Is this term still offered?
 ```{r}
-  paste("Last 12-month loan was offered in: ", max(prosperLoans[prosperLoans$Term == 12,]$LoanOriginationDate))
-  paste("Last loan in the system was offered: ", max(prosperLoans$LoanOriginationDate))
+  paste("Last 12-month loan was offered in: ", max(prosperLoans[
+      prosperLoans$Term == 12,]$LoanOriginationDate))
+  paste("Last loan in the system was offered: ", max(
+      prosperLoans$LoanOriginationDate))
 ```
 
 The last 12-month loan was 11-months before the last loan in this dataset so this term may no longer be offered.
@@ -386,7 +448,8 @@ The last 12-month loan was 11-months before the last loan in this dataset so thi
 
 ```{r echo=FALSE, Univariate_Plots}
 
-# Of the closed loans, how many are cancelled vs. default vs. charged off vs. completed?
+# Of the closed loans, how many are cancelled vs. default vs. charged off vs. 
+# completed?
 ggplot(prosperLoans[!is.na(prosperLoans$ClosedDate),], aes(LoanStatus)) +
   geom_bar()
   
@@ -395,11 +458,14 @@ ggplot(prosperLoans[!is.na(prosperLoans$ClosedDate),], aes(LoanStatus)) +
 "Charged-off" and "Defaulted" loans technically mean the same thing: The borrower was unable to pay back the loan. Let's compare the total number of defaulted loans to the number of 'completed' loans using nrow().
 
 ```{r}
-  paste("# of Closed loans: ",nrow(prosperLoans[!is.na(prosperLoans$ClosedDate),]))
-  paste("# of Completed (paid-off) loans: ",nrow(prosperLoans[prosperLoans$LoanStatus == 'Completed',]))
-  paste("# of Unpaid / Defaulted loans: ", nrow(prosperLoans[prosperLoans$UdacityInDefault == 1,]))
+  paste("# of Closed loans: ",nrow(prosperLoans[!is.na(prosperLoans$ClosedDate
+      ),]))
+  paste("# of Completed (paid-off) loans: ",nrow(prosperLoans[
+      prosperLoans$LoanStatus == 'Completed',]))
+  paste("# of Unpaid / Defaulted loans: ", nrow(prosperLoans[
+    prosperLoans$UdacityInDefault == 1,]))
 
-  ggplot(prosperLoans[!is.na(prosperLoans$ClosedDate),], aes(UdacityInDefault)) +
+  ggplot(prosperLoans[!is.na(prosperLoans$ClosedDate),], aes(UdacityInDefault))+
   geom_bar() +
   labs(title = "# of Completed and Defaulted Loans") +
   scale_x_continuous(breaks = c(0,1), labels = c("Completed", "In Default"))
@@ -412,12 +478,14 @@ What are the prosper scores for these defaulted loans?
 
 ```{r}
   
-prosperDefaultedLoans$ProsperScoreAsNumber <- getNumberFromFactor(prosperDefaultedLoans$ProsperScore)
+prosperDefaultedLoans$ProsperScoreAsNumber <- getNumberFromFactor(
+    prosperDefaultedLoans$ProsperScore)
 summary(prosperDefaultedLoans$ProsperScoreAsNumber)
 
-  ggplot(prosperDefaultedLoans, aes(ProsperScoreAsNumber)) +
-  geom_histogram() +
-  labs(title = "Loan defaults by Prosper Score", x = "ProsperScore", y = "Count")
+ggplot(prosperDefaultedLoans, aes(ProsperScoreAsNumber)) +
+    geom_histogram() +
+    labs(title = "Loan defaults by Prosper Score", x = "ProsperScore", y = 
+    "Count")
 
 
 ```
@@ -436,10 +504,15 @@ summary(prosperDefaultedLoans$UdacityDefaultPrincipalUnpaidPercent)
 The histogram shows that most loans default with most of the principal still unpaid. The average default loan has 75% of the principle outstanding. This is not a good sign. What is the distribution of prosper scores where over 75% of the principal remains outstanding? If Prosper's scoring algorithms are predicting losses correctly, we should see lower scores in this distribution.
 
 ```{r}
-ggplot(prosperDefaultedLoans[!is.na(prosperDefaultedLoans$ProsperScore) & prosperDefaultedLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75,], aes(ProsperScore)) +
-  geom_bar() +
-  labs(title = "Large Loan Defaults by Prosper Score", x = "ProsperScore", y = "Count")
-summary(prosperDefaultedLoans[!is.na(prosperDefaultedLoans$ProsperScore) & prosperDefaultedLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75,]$ProsperScoreAsNumber)
+ggplot(prosperDefaultedLoans[!is.na(prosperDefaultedLoans$ProsperScore) & 
+    prosperDefaultedLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75,], 
+    aes(ProsperScore)) +
+    geom_bar() +
+    labs(title = "Large Loan Defaults by Prosper Score", x = "ProsperScore", 
+         y = "Count")
+summary(prosperDefaultedLoans[!is.na(prosperDefaultedLoans$ProsperScore) & 
+    prosperDefaultedLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75,
+    ]$ProsperScoreAsNumber)
 
 ```
 
@@ -447,18 +520,27 @@ The scores here follow a similar distribution with the normal distribution cente
 
 ```{r}
 
-ggplot(prosperLoans[prosperLoans$UdacityInDefault == 1 & prosperLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75 & prosperLoans$LoanOriginationDate < '2013-01-01',], aes(getNumberFromFactor(ProsperScore))) +
-  geom_histogram() +
-  labs(title = "Prosper Scores for Pre-2013 Large Loan Defaults", x = "ProsperScore", y = "Count") +
-  scale_x_continuous(breaks = seq(1,11,1))
+ggplot(prosperLoans[prosperLoans$UdacityInDefault == 1 & 
+    prosperLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75 & 
+    prosperLoans$LoanOriginationDate < '2013-01-01',], 
+    aes(getNumberFromFactor(ProsperScore))) + 
+    geom_histogram() +
+    labs(title = "Prosper Scores for Pre-2013 Large Loan Defaults", 
+         x = "ProsperScore", y = "Count") +
+    scale_x_continuous(breaks = seq(1,11,1))
 
-ggplot(prosperLoans[prosperLoans$UdacityInDefault == 1 & prosperLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75 & prosperLoans$LoanOriginationDate > '2013-01-01',], aes(getNumberFromFactor(ProsperScore))) +
-  geom_histogram() +
-  labs(title = "Prosper Scores for Post-2013 Large Loan Defaults", x = "ProsperScore", y = "Count") +
-  scale_x_continuous(breaks = seq(1,11,1))
+ggplot(prosperLoans[prosperLoans$UdacityInDefault == 1 & 
+    prosperLoans$UdacityDefaultPrincipalUnpaidPercent >= 0.75 & 
+    prosperLoans$LoanOriginationDate > '2013-01-01',], 
+    aes(getNumberFromFactor(ProsperScore))) +
+    geom_histogram() +
+    labs(title = "Prosper Scores for Post-2013 Large Loan Defaults", 
+         x = "ProsperScore", y = "Count") +
+    scale_x_continuous(breaks = seq(1,11,1))
 
 print("Average time (# days) to default (for defaulted loans)")
-mean(as.numeric(prosperDefaultedLoans$ClosedDate - prosperDefaultedLoans$LoanOriginationDate))
+mean(as.numeric(prosperDefaultedLoans$ClosedDate - 
+    prosperDefaultedLoans$LoanOriginationDate))
 
 ```
 
@@ -586,9 +668,18 @@ The key driver for BorrowerAPR appears to be borrower credit rating (UdacityRati
 
 library("GGally")
 theme_set(theme_minimal(20))
-summary(prosperLoans[prosperLoans$LoanOriginationDate > '2009-01-01',]$ProsperScore)
+summary(prosperLoans[prosperLoans$LoanOriginationDate > '2009-01-01',
+    ]$ProsperScore)
 
-ggpairs(prosperLoans, columns = c('UdacityRatingAsNumber','CreditScoreRangeUpper','CreditScoreRangeLower','CurrentDelinquencies','CurrentCreditLines','EmploymentStatusDuration','AmountDelinquent','StatedMonthlyIncome'))
+ggpairs(prosperLoans, columns = c('UdacityRatingAsNumber',
+    'CreditScoreRangeUpper','CreditScoreRangeLower','CurrentDelinquencies',
+    'CurrentCreditLines','EmploymentStatusDuration','AmountDelinquent',
+    'StatedMonthlyIncome'), columnLabels = c("CreditRating", 
+    "CreditScoreUpper", "CreditScoreLower", "Delinquencies", "CreditLines", 
+    "EmployedMonths","DelinquentAmt","MonthlyIncome")) +
+  theme(axis.text = element_blank() ) + 
+  theme_grey(base_size = 8)
+
 
 ```
 
@@ -598,9 +689,11 @@ Credit score appears to have the highest correlation to borrower credit rating. 
 
 ```{r}
   # Credit score and Prosper rating are STRONGLY correlated
-  ggplot(prosperLoans, aes(x = CreditScoreRangeUpper, y = getNumberFromFactor(UdacityRating))) +
-    geom_line(stat = 'summary', fun.y = mean) +
-    labs(title = "Credit Score vs. Prosper Rating", x = "Credit Score", y = "Credit Rating")
+  ggplot(prosperLoans, aes(x = CreditScoreRangeUpper, 
+      y = getNumberFromFactor(UdacityRating))) +
+      geom_line(stat = 'summary', fun.y = mean) +
+      labs(title = "Credit Score vs. Prosper Rating", x = "Credit Score", 
+           y = "Credit Rating")
 
 ```
 
@@ -608,10 +701,13 @@ Aside from a relatively flat line at lower credit score levels, the correlation 
 
 ```{r}
 cat("# of Loans (rows):", nrow(prosperLoans))
-cat("Minimum credit score:", min(prosperLoans[!is.na(prosperLoans$CreditScoreRangeUpper),]$CreditScoreRangeUpper))
+cat("Minimum credit score:", min(prosperLoans[!is.na(
+    prosperLoans$CreditScoreRangeUpper),]$CreditScoreRangeUpper))
 # 19??? That is really low...
-cat("# of Loans with <500 credit score borrowers:", nrow(prosperLoans[prosperLoans$CreditScoreRangeUpper < 500,]))
-cat("# of loans with 19 credit score borrowers:", nrow(prosperLoans[prosperLoans$CreditScoreRangeUpper == 19,]))
+cat("# of Loans with <500 credit score borrowers:", nrow(prosperLoans[
+    prosperLoans$CreditScoreRangeUpper < 500,]))
+cat("# of loans with 19 credit score borrowers:", nrow(prosperLoans[
+    prosperLoans$CreditScoreRangeUpper == 19,]))
 ```
 
 Many of these loans are associated with borrowers with a credit score of 19! I did not think this was possible!
@@ -619,9 +715,11 @@ Many of these loans are associated with borrowers with a credit score of 19! I d
 Around 1% of the borrowers have credit scores less than 500. These loans appear quite rare which may explain why these loans are grouped in the same prosper rating category as typical lower credit scores (500 - 600). If we remove these outliers, does the correlation get stronger?
 
 ```{r}
-  ggplot(prosperLoans[prosperLoans$CreditScoreRangeUpper >= 500,], aes(x = CreditScoreRangeUpper, y = getNumberFromFactor(UdacityRating))) +
-    geom_line(stat = 'summary', fun.y = mean) +
-    labs(title = "Credit Score vs. Prosper Rating", x = "Credit Score", y = "Credit Rating")
+  ggplot(prosperLoans[prosperLoans$CreditScoreRangeUpper >= 500,], aes(
+      x = CreditScoreRangeUpper, y = getNumberFromFactor(UdacityRating))) +
+      geom_line(stat = 'summary', fun.y = mean) +
+      labs(title = "Credit Score vs. Prosper Rating", x = "Credit Score", 
+           y = "Credit Rating")
 
 ```
 
@@ -632,11 +730,15 @@ Yes! When low credit scores (possibly outliers) are removed, credit score become
 Are the number of borrower delinquencies correlated with the borrower's credit rating?
 
 ```{r}
-  #Prosper Rating somewhat related to delinquencies... but check out the data point at 51 delinquencies!
-  # Prosper Rating is 5 for this despite having 51 delinquencies. Perhaps this is due to the higher credit score.
-  ggplot(prosperLoans, aes(x = CurrentDelinquencies, y = getNumberFromFactor(UdacityRating))) +
+  # Prosper Rating somewhat related to delinquencies... but check out the data 
+  # point at 51 delinquencies!
+  # Prosper Rating is 5 for this despite having 51 delinquencies. Perhaps this 
+  # is due to the higher credit score.
+  ggplot(prosperLoans, aes(x = CurrentDelinquencies, y = getNumberFromFactor(
+      UdacityRating))) +
     geom_line(stat = 'summary', fun.y = mean) +
-    labs(title = "# Current Delinquencies vs. Prosper Rating", x = "# Current Delinquencies", y = "Prosper Credit Rating")
+    labs(title = "# Current Delinquencies vs. Prosper Rating", 
+         x = "# Current Delinquencies", y = "Prosper Credit Rating")
 
 ```
 
@@ -645,7 +747,12 @@ Delinquencies and credit rating are negatively correlated which is expected. How
 Let's query loans with >40 delinquencies and see if this is an isolated or common case?
 
 ```{r}
-  prosperLoans[!is.na(prosperLoans$CurrentDelinquencies) & prosperLoans$CurrentDelinquencies >= 40 & prosperLoans$CurrentDelinquencies < 60,][c('CurrentDelinquencies','UdacityRating','LoanOriginationDate','LoanOriginalAmount','LoanStatus','BorrowerAPR','Term','CreditScoreRangeLower','ClosedDate','StatedMonthlyIncome')]
+  prosperLoans[!is.na(prosperLoans$CurrentDelinquencies) & 
+      prosperLoans$CurrentDelinquencies >= 40 & 
+      prosperLoans$CurrentDelinquencies < 60,][c('CurrentDelinquencies',                                        
+          'UdacityRating','LoanOriginationDate','LoanOriginalAmount',
+          'LoanStatus','BorrowerAPR','Term','CreditScoreRangeLower',
+          'ClosedDate','StatedMonthlyIncome')]
 
 ```
 
@@ -658,7 +765,8 @@ Does the number of current credit lines affect credit rating?
 ```{r}
   ggplot(prosperLoans, aes(x = CurrentCreditLines, y = UdacityRatingAsNumber)) +
     geom_line(stat = 'summary', fun.y = mean) +
-    labs(title = "Current Credit Lines vs. Prosper Rating", x = "Current Credit Lines", y = "Prosper Credit Rating") 
+    labs(title = "Current Credit Lines vs. Prosper Rating", 
+         x = "Current Credit Lines", y = "Prosper Credit Rating") 
 
 
 ```
@@ -672,18 +780,22 @@ How about employment duration in months?
 ```{r}
 
 summary(prosperLoans$EmploymentStatusDuration)
-  ggplot(prosperLoans, aes(y = UdacityRatingAsNumber, x = EmploymentStatusDuration)) +
+  ggplot(prosperLoans, aes(y = UdacityRatingAsNumber, 
+    x = EmploymentStatusDuration)) +
     geom_line(stat = 'summary', fun.y = mean) +
-    labs(title = "Employment Duration vs. Prosper Rating", x = "Employment Duration (months)", y = "Prosper Credit Rating") 
+    labs(title = "Employment Duration vs. Prosper Rating", 
+        x = "Employment Duration (months)", y = "Prosper Credit Rating") 
 
 ```
 
 There does not appear to be much of a correlation here. However an interesting thing happens when we switch the X and Y axis. If we plot Prosper Rating (x) against Employment Duration in months, we see a pattern.
 
 ```{r}
-  ggplot(prosperLoans, aes(y = EmploymentStatusDuration, x = UdacityRatingAsNumber)) +
-    geom_line(stat = 'summary', fun.y = mean) +
-    labs(title = "Prosper Rating vs. Employment Duration", x = "Credit Rating", y = "Employment Duration (months)") 
+  ggplot(prosperLoans, aes(y = EmploymentStatusDuration, 
+      x = UdacityRatingAsNumber)) +
+      geom_line(stat = 'summary', fun.y = mean) +
+      labs(title = "Prosper Rating vs. Employment Duration", 
+          x = "Credit Rating", y = "Employment Duration (months)") 
 
 ```
 
@@ -716,20 +828,24 @@ Prosper uses borrow credit reports to predict default rates (and assign appropri
 ### Credit Score and Loan Default %
 
 ```{r}
-  ggplot(aes(x = CreditScoreRangeUpper, y = UdacityInDefault), data = prosperLoans) + 
-    geom_line(stat = 'summary', fun.y = 'mean') +
-    scale_x_continuous(breaks = seq(0,800,100)) +
-    labs(title = "Credit Score vs. Default Rate", x = "Credit Score", y = "Default Rate (%)")
+  ggplot(aes(x = CreditScoreRangeUpper, y = UdacityInDefault), 
+      data = prosperLoans) + 
+      geom_line(stat = 'summary', fun.y = 'mean') +
+      scale_x_continuous(breaks = seq(0,800,100)) +
+      labs(title = "Credit Score vs. Default Rate", x = "Credit Score",
+          y = "Default Rate (%)")
 
 ```
 
 Similar to the above charts, there is some noise for loans with credit scores less than 500. Let's remove these outliers and redraw the graph:
 
 ```{r}
-  ggplot(aes(x = CreditScoreRangeUpper, y = UdacityInDefault), data = prosperLoans[prosperLoans$CreditScoreRangeUpper >= 500,]) + 
-  geom_line(stat = 'summary', fun.y = 'mean') +
-  scale_x_continuous(breaks = seq(0,800,100)) +
-  labs(title = "Credit Score vs. Default Rate", x = "Credit Score", y = "Default Rate (%)")
+  ggplot(aes(x = CreditScoreRangeUpper, y = UdacityInDefault), 
+      data = prosperLoans[prosperLoans$CreditScoreRangeUpper >= 500,]) + 
+      geom_line(stat = 'summary', fun.y = 'mean') +
+      scale_x_continuous(breaks = seq(0,800,100)) +
+      labs(title = "Credit Score vs. Default Rate", x = "Credit Score", 
+          y = "Default Rate (%)")
 
 ```
 
@@ -742,21 +858,26 @@ To identify a cutoff date, let's check the most recent loan date and the average
 ```{r}
 maxDate = max(prosperLoans$LoanOriginationDate)
 cat("Most recent loan was originated in: ", maxDate)
-cat("Average time (# days) to default (for defaulted loans)", mean(as.numeric(prosperDefaultedLoans$ClosedDate - prosperDefaultedLoans$LoanOriginationDate)))
+cat("Average time (# days) to default (for defaulted loans)", mean(as.numeric(
+    prosperDefaultedLoans$ClosedDate - prosperDefaultedLoans$LoanOriginationDate
+    )))
 cutoffDate = maxDate - 511
-cat("Using mean days to default, what is a 'safe' day before which to look at defaulted loans? ", as.character(cutoffDate))
+cat("Using mean days to default, what is a 'safe' day before which to ",
+    "look at defaulted loans? ", as.character(cutoffDate))
 ```
 
 Using 2012-10-17 as a cutoff date, let's draw the graph again for >500 credit score loans:
 
 ```{r}
 
-  preCutoffLoans <- prosperLoans[prosperLoans$LoanOriginationDate <= cutoffDate,]
+preCutoffLoans <- prosperLoans[prosperLoans$LoanOriginationDate <= cutoffDate,]
 
-  ggplot(aes(x = CreditScoreRangeUpper, y = UdacityInDefault), data = preCutoffLoans[preCutoffLoans$CreditScoreRangeUpper >= 500,]) + 
+ggplot(aes(x = CreditScoreRangeUpper, y = UdacityInDefault), 
+    data = preCutoffLoans[preCutoffLoans$CreditScoreRangeUpper >= 500,]) + 
     geom_line(stat = 'summary', fun.y = 'mean') +
     scale_x_continuous(breaks = seq(0,800,100)) +
-    labs(title = "Credit Score vs. Default Rate", x = "Credit Score", y = "Default Rate (%)")
+    labs(title = "Credit Score vs. Default Rate", x = "Credit Score",
+    y = "Default Rate (%)")
 
 
 ```
@@ -768,9 +889,11 @@ This chart shows a smoother decrease in default percentages for low-middle credi
 How well does the 7-point Prosper Rating score (which takes into account other factors like employment status and income) predict defaults?
 
 ```{r}
-  ggplot(aes(x = UdacityRatingAsNumber, y = UdacityInDefault), data = preCutoffLoans) + 
-    geom_line(stat = 'summary', fun.y = 'mean') +
-    labs(title = "Prosper Rating vs. Default Rate", x = "Prosper Rating", y = "Default Rate (%)")
+  ggplot(aes(x = UdacityRatingAsNumber, y = UdacityInDefault), 
+      data = preCutoffLoans) + 
+      geom_line(stat = 'summary', fun.y = 'mean') +
+      labs(title = "Prosper Rating vs. Default Rate", x = "Prosper Rating", 
+          y = "Default Rate (%)")
 
 ```
 
@@ -781,17 +904,20 @@ Does the EstimatedLoss field correlate with more defaults?
 ```{r}
   ggplot(aes(x = EstimatedLoss, y = UdacityInDefault), data = preCutoffLoans) + 
     geom_line(stat = 'summary', fun.y = 'mean') +
-    labs(title = "Estimated Loss vs. Default Rate", x = "Estimated Loss", y = "Default Rate (%)")
+    labs(title = "Estimated Loss vs. Default Rate", x = "Estimated Loss", 
+         y = "Default Rate (%)")
 
 ```
 
 The line graph has a lot of noise. Since EstimatedLoss is a very precise field (4-digits precision), the data is quite scattered. Let's try rounding to 2-digits (creating buckets) and see if the correlation appears stronger.
 
 ```{r}
-  ggplot(aes(x = EstimatedLossRounded2, y = UdacityInDefault), data = preCutoffLoans) + 
+  ggplot(aes(x = EstimatedLossRounded2, y = UdacityInDefault), 
+    data = preCutoffLoans) + 
     geom_line(stat = 'summary', fun.y = 'mean') +
     geom_smooth() +
-    labs(title = "Estimated Loss (Rounded) vs. Default Rate", x = "Estimated Loss (Rounded)", y = "Default Rate (%)")
+    labs(title = "Estimated Loss (Rounded) vs. Default Rate", 
+        x = "Estimated Loss (Rounded)", y = "Default Rate (%)")
 
 ```
 
@@ -803,11 +929,13 @@ Unlike the previous graphs, here we can see how closely defaults are matching Pr
 
 ```{r}
   # Add a slope 1 line
-  ggplot(aes(x = EstimatedLossRounded2, y = UdacityDefaultPrincipalUnpaidPercent), data = preCutoffLoans) + 
+  ggplot(aes(x = EstimatedLossRounded2, 
+      y = UdacityDefaultPrincipalUnpaidPercent), data = preCutoffLoans) + 
   geom_line(stat = 'summary', fun.y = 'mean') +
   geom_smooth() +
   geom_abline(intercept = 0, slope = 1, linetype = 2) +
-  labs(title = "Estimated Loss vs. Unpaid Principal", x = "Estimated Loss (%)", y = "Unpaid Principal (%)")
+  labs(title = "Estimated Loss vs. Unpaid Principal", x = "Estimated Loss (%)",
+      y = "Unpaid Principal (%)")
   
 
 ```
@@ -818,12 +946,17 @@ For loans where Estimated Losses are <0.2%, actual losses exceed Prosper's estim
 
 
 ```{r}
-  ggplot(prosperLoans[!is.na(prosperLoans$EstimatedEffectiveYield),], aes(x = LoanOriginationQuarter)) +
-  geom_line(aes(y=UdacityEstimatedLossAmount, group = 'Estimated Losses', color = "Estimated Losses"), stat = 'summary', fun.y = 'sum') + 
-  geom_line(aes(y=LP_NetPrincipalLoss, group = 'Estimated Losses', color = "Actual Losses"), stat = 'summary', fun.y = 'sum') +
-  scale_y_continuous(breaks = seq(1000000,10000000,1000000), labels = c("1M","2M","3M","4M","5M","6M","7M","8M","9M","10M")) +
-  labs(title = "Principal Losses", x = "Loan Origination Quarter", y = "Loss Amount") +
-  guides(fill=guide_legend(title="Losses"))
+  ggplot(prosperLoans[!is.na(prosperLoans$EstimatedEffectiveYield),], aes(
+      x = LoanOriginationQuarter)) +
+      geom_line(aes(y=UdacityEstimatedLossAmount, group = 'Estimated Losses', 
+          color = "Estimated Losses"), stat = 'summary', fun.y = 'sum') + 
+      geom_line(aes(y=LP_NetPrincipalLoss, group = 'Estimated Losses', 
+          color = "Actual Losses"), stat = 'summary', fun.y = 'sum') +
+      scale_y_continuous(breaks = seq(1000000,10000000,1000000), labels = 
+          c("1M","2M","3M","4M","5M","6M","7M","8M","9M","10M")) +
+      labs(title = "Principal Losses", x = "Loan Origination Quarter", 
+          y = "Loss Amount") +
+      guides(fill=guide_legend(title="Losses"))
 
 
 ```
@@ -836,7 +969,8 @@ Staying on topic of defaults, does BorrowerAPR accurately predict risk of defaul
 
 ```{r}
 #  
-  ggplot(aes(x = BorrowerAPRRounded2, y = UdacityInDefault), data = preCutoffLoans) + 
+  ggplot(aes(x = BorrowerAPRRounded2, y = UdacityInDefault), 
+      data = preCutoffLoans) + 
   geom_line(stat = 'summary', fun.y = 'mean') +
   geom_smooth()
   
@@ -886,9 +1020,10 @@ Interest rates change every day. So may the Prosper Rating. When we look at aver
 ```{r}
   # Date vs. Borrower APR (and Prosper Rating)
   ggplot(prosperLoans, aes(x = LoanOriginationDate, y = BorrowerAPR)) +
-    geom_line(aes(color = UdacityRating), stat = 'summary', fun.y = mean) +
-    labs(title = "Date vs. Borrower APR", x = "Loan Origination Date", y = "Borrower APR") +
-    guides(fill=guide_legend(title="Prosper Rating"))
+      geom_line(aes(color = UdacityRating), stat = 'summary', fun.y = mean) +
+      labs(title = "Date vs. Borrower APR", x = "Loan Origination Date", 
+          y = "Borrower APR") +
+      guides(fill=guide_legend(title="Prosper Rating"))
 
   
 ```
@@ -901,8 +1036,10 @@ Is interest rate on average higher for loans that default versus those that do n
 
 ```{r}
    ggplot(preCutoffLoans, aes(x = LoanOriginationDate, y = BorrowerAPR)) +
-    geom_line(aes(color = UdacityInDefaultFactor), stat = 'summary', fun.y = mean) +
-    labs(title = "Date vs. Borrower APR", x = "Loan Origination Date", y = "Borrower APR")
+    geom_line(aes(color = UdacityInDefaultFactor), stat = 'summary', 
+        fun.y = mean) +
+    labs(title = "Date vs. Borrower APR", x = "Loan Origination Date", 
+        y = "Borrower APR")
 
 
 ```
@@ -911,8 +1048,10 @@ On most days, loans that defaulted, on average, were assigned higher interest ra
 
 ```{r}
      ggplot(preCutoffLoans, aes(x = LoanOriginationQuarter, y = BorrowerAPR)) +
-    geom_line(aes(color = UdacityInDefaultFactor, group = UdacityInDefaultFactor), stat = 'summary', fun.y = mean) +
-    labs(title = "Date vs. Borrower APR", x = "Loan Origination Quarter", y = "Borrower APR")
+    geom_line(aes(color = UdacityInDefaultFactor, 
+        group = UdacityInDefaultFactor), stat = 'summary', fun.y = mean) +
+    labs(title = "Date vs. Borrower APR", x = "Loan Origination Quarter", 
+        y = "Borrower APR")
 
 ```
 
@@ -921,7 +1060,8 @@ This graph is much easier to read than the daily view.
 Except for Q2 2009, on a quarterly basis, interest rates appear around 5% higher for loans that eventually default versus loans that are paid back in full. 2009 was the year of the SEC shutdown and there were very few loans before the second half of the year. How many loans?
 
 ```{r}
-cat("# of Loans in Q2 2009:", nrow(prosperLoans[prosperLoans$LoanOriginationQuarter == 'Q2 2009',]))
+cat("# of Loans in Q2 2009:", nrow(prosperLoans[
+    prosperLoans$LoanOriginationQuarter == 'Q2 2009',]))
 
 ```
 
@@ -931,8 +1071,9 @@ Of loans issued daily, how many default for different borrowers across different
 
 ```{r}
 ggplot(preCutoffLoans, aes(x = LoanOriginationQuarter, y = UdacityInDefault)) +
-  geom_line(aes(color = UdacityRating, group = UdacityRating), stat = 'summary', fun.y = mean) +
-  labs(colour = "Prosper Rating")
+    geom_line(aes(color = UdacityRating, group = UdacityRating), 
+        stat = 'summary', fun.y = mean) +
+    labs(colour = "Prosper Rating")
 ```
 
 There are some interesting findings here:
@@ -945,15 +1086,18 @@ Does Prosper Score, which takes into account previous loan performance, provide 
 
 ```{r}
 ggplot(preCutoffLoans, aes(x = LoanOriginationQuarter, y = UdacityInDefault)) +
-  geom_line(aes(color = ProsperScore, group = ProsperScore), stat = 'summary', fun.y = mean) 
+    geom_line(aes(color = ProsperScore, group = ProsperScore), stat = 'summary', 
+        fun.y = mean) 
 
 ```
 
 This graph is incredibly hard ot look at. The default rates cross over each other frequently and it's hard to identify the 11 colors on a single chart. Let's try to break this up into higher scoring (>4) versus lower scoring (<=4) loans. First, let's look at the lowest scoring loans:
 
 ```{r}
-ggplot(preCutoffLoans[getNumberFromFactor(preCutoffLoans$ProsperScore) <= 4, ], aes(x = LoanOriginationQuarter, y = UdacityInDefault)) +
-  geom_line(aes(color = ProsperScore, group = ProsperScore), stat = 'summary', fun.y = mean) 
+ggplot(preCutoffLoans[getNumberFromFactor(preCutoffLoans$ProsperScore) <= 4, ], 
+    aes(x = LoanOriginationQuarter, y = UdacityInDefault)) +
+    geom_line(aes(color = ProsperScore, group = ProsperScore), stat = 'summary',
+        fun.y = mean) 
 
 ```
 
@@ -961,16 +1105,20 @@ Default rates vary wildly from quarter to quarter. Default rates swing from almo
 
 ```{r}
 summary(preCutoffLoans$ProsperScore)
-summary(prosperLoans[prosperLoans$LoanOriginationQuarter == 'Q1 2011',]$ProsperScore)
-summary(prosperLoans[prosperLoans$LoanOriginationQuarter == 'Q2 2011',]$ProsperScore)
+summary(prosperLoans[prosperLoans$LoanOriginationQuarter == 'Q1 2011',
+    ]$ProsperScore)
+summary(prosperLoans[prosperLoans$LoanOriginationQuarter == 'Q2 2011',
+    ]$ProsperScore)
 
 ```
 
 Interesting... in the first quarter of 2011, there was only 1 loan in the lowest 3 prosper scores. Then in the second quarter, this number increased to 350+ loans. Overall, for the lower scores, it does not look like a strong negative correlation between Prosper Score and default rates. Does this look different for the higher scores?
 
 ```{r}
-ggplot(preCutoffLoans[getNumberFromFactor(preCutoffLoans$ProsperScore) > 4, ], aes(x = LoanOriginationQuarter, y = UdacityInDefault)) +
-  geom_line(aes(color = ProsperScore, group = ProsperScore), stat = 'summary', fun.y = mean) 
+ggplot(preCutoffLoans[getNumberFromFactor(preCutoffLoans$ProsperScore) > 4, ],
+    aes(x = LoanOriginationQuarter, y = UdacityInDefault)) +
+    geom_line(aes(color = ProsperScore, group = ProsperScore), stat = 'summary',
+    fun.y = mean) 
 
 ```
 
@@ -1001,10 +1149,13 @@ No I did not create a model for this dataset. I considered looking at a model fo
 ```{r echo=FALSE, Plot_One}
 
   # How about mean/quartiles loan amounts for each quarter?
-ggplot(aes(x = LoanOriginationQuarter, y = LoanOriginalAmount), data=prosperLoans) + geom_boxplot() + 
-stat_summary(fun.y=mean, geom="point", shape=5, size=4) +
-labs(title = "Loan Amounts During Each Quarter", x = "Loan Origination Quarter", y = "Loan Amount") +
-    theme(axis.text.x = element_text(face="bold", color="#993333", size=10, angle=45, hjust = 1)) 
+ggplot(aes(x = LoanOriginationQuarter, y = LoanOriginalAmount), 
+    data=prosperLoans) + geom_boxplot() + 
+    stat_summary(fun.y=mean, geom="point", shape=5, size=4) +
+    labs(title = "Loan Amounts During Each Quarter", 
+        x = "Loan Origination Quarter", y = "Loan Amount") +
+    theme(axis.text.x = element_text(face="bold", color="#993333", size=10, 
+        angle=45, hjust = 1)) 
 
 
 ```
@@ -1025,23 +1176,32 @@ We drew a histogram earlier showing loan counts and aggregate loan amounts on a 
 ```{r echo=FALSE, Plot_Two}
 
 # I tried to do a facet_wrap here but the HTML conversion failed. Therefore I just took the lowest, highest, and middle Prosper Rating to show the trend. 
-ggplot(preCutoffLoans[preCutoffLoans$UdacityRatingAsNumber == 1,], aes(x = LoanOriginationQuarter, fill = UdacityLoanStatusVisual)) +
-  geom_bar() +
-  labs(title = "Status by Date / Rating = 1", x = 'Date', y = 'Count') +
-  theme(axis.text.x = element_text(face="bold", color="#993333", size=10, angle=45, hjust = 1)) +
-  scale_x_discrete("",breaks = c('Q4 2005','Q4 2006','Q4 2007','Q4 2008','Q4 2009','Q4 2010','Q4 2011','Q4 2012'), drop=FALSE)
+ggplot(preCutoffLoans[preCutoffLoans$UdacityRatingAsNumber == 1,], aes(
+    x = LoanOriginationQuarter, fill = UdacityLoanStatusVisual)) +
+    geom_bar() +
+    labs(title = "Status by Date / Rating = 1", x = 'Date', y = 'Count') +
+    theme(axis.text.x = element_text(face="bold", color="#993333", size=10, 
+        angle=45, hjust = 1)) +
+    scale_x_discrete("",breaks = c('Q4 2005','Q4 2006','Q4 2007','Q4 2008',
+        'Q4 2009','Q4 2010','Q4 2011','Q4 2012'), drop=FALSE)
 
-ggplot(preCutoffLoans[preCutoffLoans$UdacityRatingAsNumber == 4,], aes(x = LoanOriginationQuarter, fill = UdacityLoanStatusVisual)) +
-  geom_bar() +
-  labs(title = "Status by Date / Rating = 4", x = 'Date', y = 'Count') +
-  theme(axis.text.x = element_text(face="bold", color="#993333", size=10, angle=45, hjust = 1)) +
-  scale_x_discrete("",breaks = c('Q4 2005','Q4 2006','Q4 2007','Q4 2008','Q4 2009','Q4 2010','Q4 2011','Q4 2012'), drop=FALSE)
+ggplot(preCutoffLoans[preCutoffLoans$UdacityRatingAsNumber == 4,], aes(
+    x = LoanOriginationQuarter, fill = UdacityLoanStatusVisual)) +
+    geom_bar() +
+    labs(title = "Status by Date / Rating = 4", x = 'Date', y = 'Count') +
+    theme(axis.text.x = element_text(face="bold", color="#993333", size=10, 
+        angle=45, hjust = 1)) +
+    scale_x_discrete("",breaks = c('Q4 2005','Q4 2006','Q4 2007','Q4 2008',
+        'Q4 2009','Q4 2010','Q4 2011','Q4 2012'), drop=FALSE)
 
-ggplot(preCutoffLoans[preCutoffLoans$UdacityRatingAsNumber == 7,], aes(x = LoanOriginationQuarter, fill = UdacityLoanStatusVisual)) +
-  geom_bar() +
-  labs(title = "Status by Date / Rating = 7", x = 'Date', y = 'Count') +
-  theme(axis.text.x = element_text(face="bold", color="#993333", size=10, angle=45, hjust = 1)) +
-  scale_x_discrete("",breaks = c('Q4 2005','Q4 2006','Q4 2007','Q4 2008','Q4 2009','Q4 2010','Q4 2011','Q4 2012'), drop=FALSE)
+ggplot(preCutoffLoans[preCutoffLoans$UdacityRatingAsNumber == 7,], aes(
+    x = LoanOriginationQuarter, fill = UdacityLoanStatusVisual)) +
+    geom_bar() +
+    labs(title = "Status by Date / Rating = 7", x = 'Date', y = 'Count') +
+    theme(axis.text.x = element_text(face="bold", color="#993333", size=10,
+        angle=45, hjust = 1)) +
+    scale_x_discrete("",breaks = c('Q4 2005','Q4 2006','Q4 2007','Q4 2008',
+        'Q4 2009','Q4 2010','Q4 2011','Q4 2012'), drop=FALSE)
 
 ```
 
@@ -1057,10 +1217,11 @@ Looking at loan status across all dates (and across Borrower Rating) reveals som
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 
-ggplot(prosperLoans, aes(x = LoanOriginationDate, y = BorrowerAPR, color = UdacityRating)) +
-#  geom_point(alpha = 1/10)
-  geom_point() +
-  labs(title = "Borrower APR and Prosper Rating", x = "Loan Origination Date", y = "Prosper Rating", colour = "Prosper Rating")
+ggplot(prosperLoans, aes(x = LoanOriginationDate, y = BorrowerAPR, 
+    color = UdacityRating)) +
+    geom_point() +
+    labs(title = "Borrower APR and Prosper Rating", x = "Loan Origination Date",
+         y = "Prosper Rating", colour = "Prosper Rating")
 
 
 
