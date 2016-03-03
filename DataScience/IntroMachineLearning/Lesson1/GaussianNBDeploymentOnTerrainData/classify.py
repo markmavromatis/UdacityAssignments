@@ -4,18 +4,31 @@ def NBAccuracy(features_train, labels_train, features_test, labels_test):
     from sklearn.naive_bayes import GaussianNB
 
     ### create classifier
-    clf = #TODO
+
+    clf = GaussianNB()
 
     ### fit the classifier on the training features and labels
-    #TODO
+    clf.fit(features_train, labels_train)    
 
     ### use the trained classifier to predict labels for the test features
-    pred = #TODO
-
+    pred = clf.predict(features_test)
 
     ### calculate and return the accuracy on the test data
     ### this is slightly different than the example, 
     ### where we just print the accuracy
     ### you might need to import an sklearn module
-    accuracy = #TODO
+
+
+    # Code for calculating accuracy
+    # features_count = len(features_test)
+    # correct_count = 0
+    # for each_point in range(0, features_count):
+    #     if pred[each_point] == labels_test[each_point]:
+    #         correct_count += 1
+    # accuracy = correct_count * 1.0 / features_count
+    
+    # Or make a call to sklearn
+    from sklearn.metrics import accuracy_score
+    accuracy = accuracy_score(labels_test, pred)
+
     return accuracy
