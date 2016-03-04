@@ -1,5 +1,5 @@
 import sys
-from class_vis import prettyPicture
+from class_vis import prettyPicture, output_image
 from prep_terrain_data import makeTerrainData
 
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ features_train, labels_train, features_test, labels_test = makeTerrainData()
 ########################## SVM #################################
 ### we handle the import statement and SVC creation for you here
 from sklearn.svm import SVC
-clf = SVC(kernel="linear")
+clf = SVC(C = 1000.0, gamma = 1000, kernel="rbf")
 
 
 #### now your job is to fit the classifier
@@ -26,7 +26,9 @@ clf.fit(features_train, labels_train)
 pred = clf.predict(features_test)
 
 
-
+### draw the decision boundary with the text points overlaid
+prettyPicture(clf, features_test, labels_test)
+output_image("test.png", "png", open("test.png", "rb").read())
 
 
 from sklearn.metrics import accuracy_score
