@@ -8,7 +8,7 @@ Review passenger data from the Titanic disaster and investigate which factors af
 
 Download OpenStreetMap XML data for a particular region. Audit/cleanse the data using Python and convert it to JSON format. Import the file into MongoDB and run queries on the data. Report results.
 
-## P4 Explore and Summarize Data
+## P4 Explore Prosper Loan Data
 
 Choose a dataset (Prosper Loan data)
 Analyze and cleanse this data using R. Document analysis steps in .RMD file.
