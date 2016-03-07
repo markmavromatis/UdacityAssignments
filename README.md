@@ -1,6 +1,3 @@
-# UdacityAssignments
-Assignments for Udacity courses
-
 This repository hosts the assignments and project work for my Udacity Data Science Nanodegree. These assignments include:
 
 ## P2 Investigate Titanic DataSet
