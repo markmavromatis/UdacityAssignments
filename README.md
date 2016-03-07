@@ -4,6 +4,11 @@ This repository hosts the assignments and project work for my Udacity Data Scien
 
 Review passenger data from the Titanic disaster and investigate which factors affected passenger survival. Develop a hypothesis and prove it using statistical analysis tools.
 
+A full description of the dataset can be found here:
+
+https://www.kaggle.com/c/titanic/data
+
+
 ## P3 Wrangle OpenStreetMap Data
 
 * Download OpenStreetMap XML data for a particular region. 
