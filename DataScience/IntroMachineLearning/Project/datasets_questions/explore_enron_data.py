@@ -18,5 +18,32 @@
 import pickle
 
 enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "r"))
+#print(len(enron_data))
+i = 0
+# for eachKey in enron_data.keys():
+#     if enron_data[eachKey]['poi'] == True:
+#     #print(len(enron_data[eachKey]))
+#         print(enron_data[eachKey])
+#         i += 1
+#
+# print("Poin = True Count: " + str(i))
+print(enron_data.keys())
 
+# Total stock value of James Prentice's holdings
+# print(enron_data['PRENTICE JAMES']['total_stock_value'])
+# Number of emails from Wesley Colwell
+# print("Wesley Colwell: From Messages")
+# print(enron_data['COLWELL WESLEY']['from_messages'])
+# print("Wesley Colwell: To Messages")
+# print(enron_data['COLWELL WESLEY']['to_messages'])
+# print("Wesley Colwell: To POI")
+# print(enron_data['COLWELL WESLEY']['from_this_person_to_poi'])
 
+print(enron_data['COLWELL WESLEY'].keys())
+# Total value of stock options exercised by Jeffrey Skilling
+print(enron_data['SKILLING JEFFREY K']['exercised_stock_options'])
+
+# Who took home the most money?
+print(enron_data['SKILLING JEFFREY K']['total_payments'])
+print(enron_data['LAY KENNETH L']['total_payments'])
+print(enron_data['FASTOW ANDREW S']['total_payments'])
