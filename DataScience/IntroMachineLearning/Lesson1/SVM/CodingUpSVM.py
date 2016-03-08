@@ -14,7 +14,7 @@ features_train, labels_train, features_test, labels_test = makeTerrainData()
 ########################## SVM #################################
 ### we handle the import statement and SVC creation for you here
 from sklearn.svm import SVC
-clf = SVC(C = 1000.0, gamma = 1000, kernel="rbf")
+clf = SVC(C = 1000.0, gamma = 10000, kernel="rbf")
 
 
 #### now your job is to fit the classifier
