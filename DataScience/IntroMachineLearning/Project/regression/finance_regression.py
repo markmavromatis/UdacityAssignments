@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+#import ../tools/feat tools/feature_format
+
 """
     Starter code for the regression mini-project.
     
@@ -15,6 +17,7 @@
 
 import sys
 import pickle
+
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 dictionary = pickle.load( open("../final_project/final_project_dataset_modified.pkl", "r") )
@@ -29,7 +32,7 @@ target, features = targetFeatureSplit( data )
 from sklearn.cross_validation import train_test_split
 feature_train, feature_test, target_train, target_test = train_test_split(features, target, test_size=0.5, random_state=42)
 train_color = "b"
-test_color = "b"
+test_color = "r"
 
 
 
@@ -37,12 +40,34 @@ test_color = "b"
 ### Please name it reg, so that the plotting code below picks it up and 
 ### plots it correctly. Don't forget to change the test_color above from "b" to
 ### "r" to differentiate training points from test points.
+from sklearn import linear_model
+
+# Create linear regression object
+reg = linear_model.LinearRegression()
+# Train the model using the training sets
+reg.fit(feature_train, target_train)
+
+# The coefficients
+print('Coefficients: \n', reg.coef_)
+
+# The intercept
+print('Intercept: \n', reg.intercept_)
+
+# Variance score
+print("Variance score (training data) is: " + str(reg.score(feature_train, target_train)))
+print("Variance score (testing data) is: " + str(reg.score(feature_test, target_test)))
 
 
+# What if we regress bonus against another feature: i.e. long term incentive?
+features_list2 = ["bonus", "long_term_incentive"]
+data2 = featureFormat( dictionary, features_list2, remove_any_zeroes=True)
+target2, features2 = targetFeatureSplit( data2 )
+feature_train2, feature_test2, target_train2, target_test2 = train_test_split(features2, target2, test_size=0.5, random_state=42)
 
 
-
-
+reg2 = linear_model.LinearRegression()
+reg2.fit(feature_train2, target_train2)
+print("Variance score (testing data) for long-term incentive is: " + str(reg2.score(feature_test2, target_test2)))
 
 
 ### draw the scatterplot, with color-coded training and testing points
@@ -64,6 +89,12 @@ try:
     plt.plot( feature_test, reg.predict(feature_test) )
 except NameError:
     pass
+
+# Additional code at end of lesson
+reg.fit(feature_test, target_test)
+plt.plot(feature_train, reg.predict(feature_train), color = 'b')
+print("New regression line slope = " + str(reg.coef_))
+
 plt.xlabel(features_list[1])
 plt.ylabel(features_list[0])
 plt.legend()
