@@ -25,21 +25,23 @@ print("Katie's predicted net worth is: " + str(km_net_worth))
 
 ### get the slope
 ### again, you'll get a 2-D array, so stick the [0][0] at the end
-slope = 0. ### fill in the line of code to get the right value
-
+slope = reg.coef_[0][0]
+print("Slope is: " + str(slope))
 
 ### get the intercept
 ### here you get a 1-D array, so stick [0] on the end to access
 ### the info we want
-intercept = 0. ### fill in the line of code to get the right value
+intercept = reg.intercept_[0]
+print("Intercept is: " + str(intercept))
 
 
 ### get the score on test data
-test_score = 0. ### fill in the line of code to get the right value
-
+test_score = reg.score(ages_test, net_worths_test)
+print("Test score = " + str(test_score))
 
 ### get the score on the training data
-training_score = 0. ### fill in the line of code to get the right value
+training_score = reg.score(ages_train, net_worths_train)
+print("Training score = " + str(training_score))
 
 
 
