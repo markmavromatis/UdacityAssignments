@@ -11,6 +11,7 @@ import pickle
 import numpy
 import matplotlib.pyplot as plt
 import sys
+import math
 sys.path.append("../tools/")
 from feature_format import featureFormat, targetFeatureSplit
 
@@ -43,34 +44,93 @@ data_dict = pickle.load( open("../final_project/final_project_dataset.pkl", "r")
 ### there's an outlier--remove it! 
 data_dict.pop("TOTAL", 0)
 
+min_stock_options = -1
+max_stock_options = 0
+
+for key in data_dict:
+    stock_options = data_dict[key]['exercised_stock_options']
+    if math.isnan(float(stock_options)) != True:
+        if min_stock_options == -1 or stock_options < min_stock_options:
+            min_stock_options = stock_options
+        if stock_options > max_stock_options:
+            max_stock_options = stock_options
+
+print("Max stock options = " + str(min_stock_options))
+print("Min stock options = " + str(max_stock_options))
+
+min_salary = -1
+max_salary= 0
+
+for key in data_dict:
+    salary = data_dict[key]['salary']
+    if math.isnan(float(salary)) != True:
+        if min_salary == -1 or salary < min_salary:
+            min_salary = salary
+        if salary > max_salary:
+            max_salary = salary
+
+print("Max salary = " + str(max_salary))
+print("Min salary= " + str(min_salary))
 
 ### the input features we want to use 
 ### can be any key in the person-level dictionary (salary, director_fees, etc.) 
 feature_1 = "salary"
 feature_2 = "exercised_stock_options"
+feature_3 = "total_payments"
 poi  = "poi"
-features_list = [poi, feature_1, feature_2]
+features_list = [poi, feature_1, feature_2, feature_3]
 data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
 
 
+# Scale features using MinMax scaler
+from sklearn import preprocessing
+salaries = []
+stock_options = []
+for each_feature_row in finance_features:
+    salaries.append(each_feature_row[0] * 1.0)
+    stock_options.append(each_feature_row[1] * 1.0)
+
+min_max_scaler = preprocessing.MinMaxScaler()
+salaries_minmax = min_max_scaler.fit_transform(salaries)
+scaled_200k_salary = min_max_scaler.transform([200000])
+stock_options_minmax = min_max_scaler.fit_transform(stock_options)
+scaled_1M_options = min_max_scaler.transform([1000000])
+#print("Salaries minmax = " + str(salaries_minmax))
+#print(min_max_scaler.)
+print("Scaled 200k salary = " + str(scaled_200k_salary))
+print("Scaled 1M options = " + str(scaled_1M_options))
+
+finance_features_minmax = []
+for i in range(len(salaries_minmax)):
+    finance_features_minmax.append([salaries_minmax[i], stock_options_minmax[i]])
 ### in the "clustering with 3 features" part of the mini-project,
 ### you'll want to change this line to 
 ### for f1, f2, _ in finance_features:
 ### (as it's currently written, the line below assumes 2 features)
-for f1, f2 in finance_features:
-    plt.scatter( f1, f2 )
-plt.show()
+#for f1, f2, f3 in finance_features:
+#    plt.scatter( f1, f2 )
+#plt.show()
 
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
 
+#print("Data = ")
+#print(data)
+#print("Finance Features:")
+#print(finance_features)
 
+from sklearn.cluster import KMeans
+kmeans_example = KMeans(n_clusters=2)
+kmeans_example.fit_predict(finance_features_minmax)
+pred = kmeans_example.labels_
+#pred = kmeans_example.predict()
+#print(labels)
 
 
 ### rename the "name" parameter when you change the number of features
 ### so that the figure gets saved to a different file
 try:
-    Draw(pred, finance_features, poi, mark_poi=False, name="clusters.pdf", f1_name=feature_1, f2_name=feature_2)
+    Draw(pred, finance_features, poi, mark_poi=False, name="clusters_scaled.pdf", f1_name=feature_1, f2_name=feature_2)
 except NameError:
     print "no predictions object named pred found, no clusters to plot"
