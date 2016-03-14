@@ -54,7 +54,7 @@ for name, from_person in [("sara", from_sara), ("chris", from_chris)]:
 
             ### use str.replace() to remove any instances of the words
             ### ["sara", "shackleton", "chris", "germani"]
-            ignore_words_array = ['sara','shackleton','chris','germani']
+            ignore_words_array = ['sara','shackleton','chris','germani','sshacklensf', 'cgermannsf']
             for ignore_word in ignore_words_array:
                 email_test = email_test.replace(ignore_word, "")
 
