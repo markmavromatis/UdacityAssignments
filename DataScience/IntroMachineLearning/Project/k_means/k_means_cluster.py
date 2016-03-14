@@ -83,13 +83,34 @@ data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
 
 
+# Scale features using MinMax scaler
+from sklearn import preprocessing
+salaries = []
+stock_options = []
+for each_feature_row in finance_features:
+    salaries.append(each_feature_row[0] * 1.0)
+    stock_options.append(each_feature_row[1] * 1.0)
+
+min_max_scaler = preprocessing.MinMaxScaler()
+salaries_minmax = min_max_scaler.fit_transform(salaries)
+scaled_200k_salary = min_max_scaler.transform([200000])
+stock_options_minmax = min_max_scaler.fit_transform(stock_options)
+scaled_1M_options = min_max_scaler.transform([1000000])
+#print("Salaries minmax = " + str(salaries_minmax))
+#print(min_max_scaler.)
+print("Scaled 200k salary = " + str(scaled_200k_salary))
+print("Scaled 1M options = " + str(scaled_1M_options))
+
+finance_features_minmax = []
+for i in range(len(salaries_minmax)):
+    finance_features_minmax.append([salaries_minmax[i], stock_options_minmax[i]])
 ### in the "clustering with 3 features" part of the mini-project,
 ### you'll want to change this line to 
 ### for f1, f2, _ in finance_features:
 ### (as it's currently written, the line below assumes 2 features)
-for f1, f2, f3 in finance_features:
-    plt.scatter( f1, f2 )
-plt.show()
+#for f1, f2, f3 in finance_features:
+#    plt.scatter( f1, f2 )
+#plt.show()
 
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
@@ -101,7 +122,7 @@ plt.show()
 
 from sklearn.cluster import KMeans
 kmeans_example = KMeans(n_clusters=2)
-kmeans_example.fit_predict(finance_features)
+kmeans_example.fit_predict(finance_features_minmax)
 pred = kmeans_example.labels_
 #pred = kmeans_example.predict()
 #print(labels)
@@ -110,6 +131,6 @@ pred = kmeans_example.labels_
 ### rename the "name" parameter when you change the number of features
 ### so that the figure gets saved to a different file
 try:
-    Draw(pred, finance_features, poi, mark_poi=False, name="clusters_3features.pdf", f1_name=feature_1, f2_name=feature_2)
+    Draw(pred, finance_features, poi, mark_poi=False, name="clusters_scaled.pdf", f1_name=feature_1, f2_name=feature_2)
 except NameError:
     print "no predictions object named pred found, no clusters to plot"
