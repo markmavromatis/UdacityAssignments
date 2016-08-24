@@ -1,15 +1,16 @@
 <html>
 <head>
-  <script type="text/javascript">
-
-  </script>
+<title>Carrier OnTime Performance for Top 10 Airports</title>
 </head>
 
 <body>
 <div>
-<h2>Carrier On-Time Performance for Airports</h2></div>
+<h2>Carrier On-Time Performance for America's Top 10</h2>
+
+</div>
 <!-- <select id="airport" onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value + '&timeframe=' + document.getElementById('timeframe').value" name="airport">
  -->  
+<label>Airport: </label>
 <select id="airport" onChange="window.location.href=buildUrl()" name="airport">
   <option id="ATL" value="ATL">Atlanta International</option>
   <option id="ORD" value="ORD">Chicago O'Hare</option>
@@ -21,7 +22,8 @@
   <option id="MSP" value="MSP">Minneapolis St Paul</option>
   <option id="PHX" value="PHX">Phoenix Sky Harbor</option>
   <option id="SFO" value="SFO">San Francisco International</option>
-</select>
+</select><br>
+<label>Timeframe: </label>
 <select id="timeframe" onchange="window.location.href=buildUrl()" name="timeframe">
   <option id="annual" value="annual">Annual</option>
   <option id="jan" value="jan">January</option>
@@ -70,6 +72,7 @@
     console.log("Selected airport is: " + selectedAirport);
 
     document.getElementById(selectedAirport).selected=true;
+    document.getElementById(selectedTimeframe).selected=true;
 
 
     var svg = dimple.newSvg("#chartContainer", 590, 400);
@@ -93,6 +96,20 @@
       myChart.draw();
     });
   </script>
+</div>
+<div>
+<p>
+<p>Carrier On-Time Performance for America's Top 10 Airports
+
+Based on domestic departures
+US Department of Transportation - Bureau of Transportation Statistics</p>
+
+
+Some observations:
+
+  Flight delays are not consistent across carriers (even at the same airport). Some carriers are 'worse' than others.
+  Flight delays are not dependent on weather. Summer months and Winter months share similar delay statistics.
+</p>
 </div>
 </body>
 
