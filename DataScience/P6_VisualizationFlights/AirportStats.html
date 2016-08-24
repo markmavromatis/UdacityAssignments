@@ -1,0 +1,32 @@
+<html>
+<body>
+<div>
+<h2>Test Title</h2></div>
+<div id="chartContainer">
+  <script src="/lib/d3.v3.4.12.min.js"></script>
+  <script src="/lib/dimple.v2.1.6.min.js"></script>
+  <script type="text/javascript">
+    var svg = dimple.newSvg("#chartContainer", 590, 400)
+      .text("My Title");
+    d3.csv("/data/airport_stats.csv", function (data) {
+      data2 = data.filter(function(row) {
+        return row['Airport'] === "ORD";
+      })
+      console.log("Data rows = " + data.length);
+      console.log("Filtered rows = " + data2.length);
+      // console.log("Airport argument is: " + get('airport'));
+      console.log(window.location.search);
+      debugger;
+      var myChart = new dimple.chart(svg, data);
+      myChart.setBounds(60, 45, 510, 315);
+      myChart.addCategoryAxis("x", "Airport");
+      myChart.addMeasureAxis("y", "Count");
+      myChart.addSeries("RecordType", dimple.plot.bar);
+      myChart.addLegend(200, 10, 380, 20, "right");
+      myChart.draw();
+    });
+  </script>
+</div>
+</body>
+
+</html>
