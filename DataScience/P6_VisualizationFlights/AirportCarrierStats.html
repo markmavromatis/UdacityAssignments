@@ -3,8 +3,31 @@
 <div>
 <h2>Carrier On-Time Performance for Airports</h2></div>
 <select onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value" name="airport">
+  <option id="ATL" value="ATL">Atlanta International</option>
   <option id="ORD" value="ORD">Chicago O'Hare</option>
+  <option id="DFW" value="DFW">Dallas / Fort Worth</option>
+  <option id="DEN" value="DEN">Denver International</option>
+  <option id="IAH" value="IAH">Houston Intercontinental</option>
+  <option id="LAS" value="LAS">Las Vegas McCarran</option>
+  <option id="LAX" value="LAX">Los Angeles International</option>
+  <option id="MSP" value="MSP">Minneapolis St Paul</option>
+  <option id="PHX" value="PHX">Phoenix Sky Harbor</option>
   <option id="SFO" value="SFO">San Francisco International</option>
+</select>
+<select onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value" name="timeframe">
+  <option id="annual" value="annual">Annual</option>
+  <option id="jan" value="jan">January</option>
+  <option id="feb" value="feb">February</option>
+  <option id="mar" value="mar">March</option>
+  <option id="apr" value="apr">April</option>
+  <option id="may" value="may">May</option>
+  <option id="jun" value="jun">June</option>
+  <option id="jul" value="jul">July</option>
+  <option id="aug" value="aug">August</option>
+  <option id="sep" value="sep">September</option>
+  <option id="oct" value="oct">October</option>
+  <option id="nov" value="nov">November</option>
+  <option id="dec" value="dec">December</option>
 </select>
 <div id="chartContainer">
   <script src="/lib/d3.v3.4.12.min.js"></script>
@@ -30,24 +53,11 @@
       console.log('Query variable %s not found', variable);
   }
 
-    function getAirportFromArgs() {
-      var returnAirport = "";
-      var args = window.location.search.substring(1);
-      if (args.indexOf("&") > 0) {
-        nameValuePairs = args.split("&");
-        returnAirport=args[1];
-
-      } else {
-        throw "Multiple request parameters not accepted. Please specify an airport parameter."
-      }
-      console.log("Airport = " + returnAirport);
-    }
-    var airport = window.location.search.substring(1)
 
     var svg = dimple.newSvg("#chartContainer", 590, 400);
     d3.csv("/data/airport_carrier_stats.csv", function (data) {
       data2 = data.filter(function(row) {
-        return row['Origin'] === "ORD";
+        return row['Origin'] === getQueryVariable("airport");
       })
       console.log("Data rows = " + data.length);
       console.log("Filtered rows = " + data2.length);
