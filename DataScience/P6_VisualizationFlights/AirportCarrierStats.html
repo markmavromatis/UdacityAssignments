@@ -5,7 +5,7 @@
 
 <body>
 <div>
-<h2>Carrier On-Time Performance for America's Top 10</h2>
+<h2>Airline OnTime Performance at US Top10 Airports</h2>
 
 </div>
 <!-- <select id="airport" onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value + '&timeframe=' + document.getElementById('timeframe').value" name="airport">
@@ -44,9 +44,19 @@
   <script src="lib/dimple.v2.1.6.min.js"></script>
   <script type="text/javascript">
 
-  function buildUrl() {
-    return `AirportCarrierStats.html?airport=${document.getElementById('airport').value}&timeframe=${document.getElementById('timeframe').value}`
-  }
+    function buildUrl() {
+      return `AirportCarrierStats.html?airport=${document.getElementById('airport').value}&timeframe=${document.getElementById('timeframe').value}`
+    }
+
+    function formatPercent(aPercentage) {
+      return (Math.round(aPercentage.toFixed(2) * 100)).toString() + "%"
+    }
+
+    // Copied from here: http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+    function formatLargeNumber(aNumber) {
+      // return Number(aNumber).toLocaleString();
+      return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+    }
 
     function getQueryVariable(variable) {
         var query = window.location.search.substring(1);
@@ -101,14 +111,14 @@
         var carrier = fields[1];
         var returnValue = "";
 
-        if (recordType === "Totals") {
-          returnValue = [`On-Time Flights = ${e.yValue}`];
+        if (recordType === "OnTime") {
+          returnValue = [`On-Time Flights = ${formatLargeNumber(e.yValue)}`];
         } else {
           var filtered = data2.filter(function(row) {
-            return row['RecordType'] === 'Delays' && row['CarrierName'] === carrier;
+            return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
           })
           var ontimeFilter = data2.filter(function(row) {
-            return row['RecordType'] === 'Totals' && row['CarrierName'] === carrier;
+            return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
           })
           var ontimeFlights = ontimeFilter.reduce(function(a, b) {
             return a + parseFloat(b['Count']);
@@ -125,6 +135,8 @@
           var carrierDelayMins = filtered.reduce(function(a, b) {
             return a + parseFloat(b['CarrierDelayMins']);
           }, 0);
+          console.log("Delayed mins = " + delayedMins)
+          console.log("Carrier Delay mins = " + carrierDelayMins)
           var weatherDelayMins = filtered.reduce(function(a, b) {
             return a + parseFloat(b['WeatherDelayMins']);
           }, 0);
@@ -138,18 +150,15 @@
             return a + parseFloat(b['LateAircraftDelayMins']);
           }, 0);
           // debugger;
-          returnValue = [`Delayed Flights = ${e.yValue} (${delayedPercent.toFixed(2) * 100}%)`,
-            `Carrier Delay = ${(carrierDelayMins / delayedMins * 100).toFixed(2)}%`,
-            `Weather Delay = ${Math.round(weatherDelayMins / delayedMins * 100, 2)}%`,
-            `NAS Delay = ${Math.round(nasDelayMins / delayedMins * 100, 2)}%`,
-            `Security Delay = ${Math.round(securityDelayMins / delayedMins * 100, 2)}%`,
-            `Late Aircraft Delay = ${Math.round(lateAircraftDelayMins / delayedMins * 100, 2)}%`
+          returnValue = [`Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
+            `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
+            `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
+            `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
+            `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
+            `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
             ];
         }
-        // debugger;
-        // console.log("Hello World");
-        // console.log(filtered[0]);
-        // console.log(filtered[0]['CarrierDelayMins'])
+
         return returnValue;
       };
       myChart.draw();
@@ -164,10 +173,18 @@ Based on domestic departures
 US Department of Transportation - Bureau of Transportation Statistics</p>
 
 
-Some observations:
+Some observations:<br>
+<UL>
+  <LI>
+  Flight delays are not consistent across carriers (even at the same airport in the same month). Some carriers are 'worse' than others.<br>
+  </LI>
+  <LI>
+  Cold weather not always a lead factor in flight delays. United Airlines performance at Chicago in June was abysmal. 41% of the flights were delayed versus 29% in cold Chicago January!
+  </LI>
+  <LI>
+  As much as people complain about time spent in airport security, security is rarely a factor in flight delays.
+  </LI>
 
-  Flight delays are not consistent across carriers (even at the same airport). Some carriers are 'worse' than others.
-  Flight delays are not dependent on weather. Summer months and Winter months share similar delay statistics.
 </p>
 </div>
 </body>
