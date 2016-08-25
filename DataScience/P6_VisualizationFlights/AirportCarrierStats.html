@@ -40,8 +40,8 @@
   <option id="dec" value="dec">December</option>
 </select>
 <div id="chartContainer">
-  <script src="/lib/d3.v3.4.12.min.js"></script>
-  <script src="/lib/dimple.v2.1.6.min.js"></script>
+  <script src="lib/d3.v3.4.12.min.js"></script>
+  <script src="lib/dimple.v2.1.6.min.js"></script>
   <script type="text/javascript">
 
   function buildUrl() {
@@ -76,7 +76,7 @@
 
 
     var svg = dimple.newSvg("#chartContainer", 590, 400);
-    var filename = `/data/airport_carrier_stats_${selectedTimeframe}.csv`
+    var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 //    debugger;
     d3.csv(filename, function (data) {
       data2 = data.filter(function(row) {
@@ -91,8 +91,17 @@
       myChart.setBounds(60, 45, 510, 315);
       myChart.addCategoryAxis("x", "CarrierName");
       myChart.addMeasureAxis("y", "Count");
-      myChart.addSeries("RecordType", dimple.plot.bar);
+      var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
       myChart.addLegend(200, 10, 380, 20, "right");
+      series.getTooltipText = function(e) {
+        var filtered = data2.filter(function(row) {
+          return row['RecordType'] === 'Delays';
+        })
+        console.log("Hello World");
+        console.log(filtered[0]);
+        console.log(filtered[0]['CarrierDelayMins'])
+        return ["This is a test", "Carrier Delay Mins = " + filtered[0]['CarrierDelayMins']]
+      };
       myChart.draw();
     });
   </script>
