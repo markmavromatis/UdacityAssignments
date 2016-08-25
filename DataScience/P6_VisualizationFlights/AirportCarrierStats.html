@@ -94,13 +94,63 @@
       var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
       myChart.addLegend(200, 10, 380, 20, "right");
       series.getTooltipText = function(e) {
-        var filtered = data2.filter(function(row) {
-          return row['RecordType'] === 'Delays';
-        })
-        console.log("Hello World");
-        console.log(filtered[0]);
-        console.log(filtered[0]['CarrierDelayMins'])
-        return ["This is a test", "Carrier Delay Mins = " + filtered[0]['CarrierDelayMins']]
+        var key = e.key;
+        console.log("KEY = " + key);
+        var fields = key.split("_");
+        var recordType = fields[0];
+        var carrier = fields[1];
+        var returnValue = "";
+
+        if (recordType === "Totals") {
+          returnValue = [`On-Time Flights = ${e.yValue}`];
+        } else {
+          var filtered = data2.filter(function(row) {
+            return row['RecordType'] === 'Delays' && row['CarrierName'] === carrier;
+          })
+          var ontimeFilter = data2.filter(function(row) {
+            return row['RecordType'] === 'Totals' && row['CarrierName'] === carrier;
+          })
+          var ontimeFlights = ontimeFilter.reduce(function(a, b) {
+            return a + parseFloat(b['Count']);
+          }, 0);
+          var delayedFlights = e.yValue;
+          console.log(`Delayed flights = ${delayedFlights}`)
+          console.log(`On-Time flights = ${ontimeFlights}`)
+          var totalFlights = ontimeFlights + delayedFlights;
+          var delayedPercent = delayedFlights / totalFlights; 
+          // debugger;
+          var delayedMins = filtered.reduce(function(a, b) {
+            return a + parseFloat(b['ArrDelayMins']);
+          }, 0);
+          var carrierDelayMins = filtered.reduce(function(a, b) {
+            return a + parseFloat(b['CarrierDelayMins']);
+          }, 0);
+          var weatherDelayMins = filtered.reduce(function(a, b) {
+            return a + parseFloat(b['WeatherDelayMins']);
+          }, 0);
+          var nasDelayMins = filtered.reduce(function(a, b) {
+            return a + parseFloat(b['NasDelayMins']);
+          }, 0);
+          var securityDelayMins = filtered.reduce(function(a, b) {
+            return a + parseFloat(b['SecurityDelayMins']);
+          }, 0);
+          var lateAircraftDelayMins = filtered.reduce(function(a, b) {
+            return a + parseFloat(b['LateAircraftDelayMins']);
+          }, 0);
+          // debugger;
+          returnValue = [`Delayed Flights = ${e.yValue} (${delayedPercent.toFixed(2) * 100}%)`,
+            `Carrier Delay = ${(carrierDelayMins / delayedMins * 100).toFixed(2)}%`,
+            `Weather Delay = ${Math.round(weatherDelayMins / delayedMins * 100, 2)}%`,
+            `NAS Delay = ${Math.round(nasDelayMins / delayedMins * 100, 2)}%`,
+            `Security Delay = ${Math.round(securityDelayMins / delayedMins * 100, 2)}%`,
+            `Late Aircraft Delay = ${Math.round(lateAircraftDelayMins / delayedMins * 100, 2)}%`
+            ];
+        }
+        // debugger;
+        // console.log("Hello World");
+        // console.log(filtered[0]);
+        // console.log(filtered[0]['CarrierDelayMins'])
+        return returnValue;
       };
       myChart.draw();
     });
