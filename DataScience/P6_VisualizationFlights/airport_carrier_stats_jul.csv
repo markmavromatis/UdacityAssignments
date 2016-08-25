@@ -1,0 +1,205 @@
+RecordType,Origin,Month,CarrierName,Count,Cancellations,CarrierDelayMins,WeatherDelayMins,NasDelayMins,SecurityDelayMins,LateAircraftDelayMins
+Totals,ATL,7,American Airlines,1046
+Delays,ATL,7,American Airlines,165.0,8.0,2408.0,334.0,2094.0,13.0,4775.0
+Totals,ATL,7,Alaska Airlines,31
+Delays,ATL,7,Alaska Airlines,4.0,0.0,70.0,0.0,73.0,0.0,34.0
+Totals,ATL,7,Delta Air Lines,21591
+Delays,ATL,7,Delta Air Lines,3896.0,12.0,67640.0,27051.0,43079.0,0.0,52285.0
+Totals,ATL,7,ExpressJet Airlines,5477
+Delays,ATL,7,ExpressJet Airlines,1142.0,11.0,36235.0,14.0,9066.0,0.0,20369.0
+Totals,ATL,7,Frontier Airlines,528
+Delays,ATL,7,Frontier Airlines,174.0,2.0,3503.0,73.0,6367.0,0.0,5543.0
+Totals,ATL,7,Envoy Air,174
+Delays,ATL,7,Envoy Air,42.0,17.0,461.0,59.0,1124.0,0.0,1238.0
+Totals,ATL,7,Spirit Airlines,434
+Delays,ATL,7,Spirit Airlines,158.0,4.0,2210.0,94.0,2863.0,114.0,5579.0
+Totals,ATL,7,SkyWest Airlines,426
+Delays,ATL,7,SkyWest Airlines,73.0,14.0,2502.0,240.0,1969.0,0.0,2197.0
+Totals,ATL,7,United Airlines,315
+Delays,ATL,7,United Airlines,84.0,8.0,1170.0,236.0,2034.0,0.0,2696.0
+Totals,ATL,7,Southwest Airlines,3713
+Delays,ATL,7,Southwest Airlines,1206.0,11.0,20828.0,2857.0,7115.0,21.0,33991.0
+Totals,DEN,7,American Airlines,951
+Delays,DEN,7,American Airlines,148.0,7.0,3205.0,285.0,1514.0,0.0,5504.0
+Totals,DEN,7,Alaska Airlines,182
+Delays,DEN,7,Alaska Airlines,11.0,0.0,382.0,0.0,142.0,0.0,153.0
+Totals,DEN,7,JetBlue Airways,93
+Delays,DEN,7,JetBlue Airways,32.0,1.0,75.0,18.0,188.0,0.0,707.0
+Totals,DEN,7,Delta Air Lines,697
+Delays,DEN,7,Delta Air Lines,116.0,0.0,2953.0,68.0,1268.0,0.0,1874.0
+Totals,DEN,7,ExpressJet Airlines,13
+Delays,DEN,7,ExpressJet Airlines,4.0,2.0,254.0,0.0,0.0,0.0,0.0
+Totals,DEN,7,Frontier Airlines,1968
+Delays,DEN,7,Frontier Airlines,408.0,2.0,5466.0,495.0,10260.0,0.0,6547.0
+Totals,DEN,7,Spirit Airlines,403
+Delays,DEN,7,Spirit Airlines,103.0,6.0,1156.0,130.0,1984.0,0.0,3118.0
+Totals,DEN,7,SkyWest Airlines,4675
+Delays,DEN,7,SkyWest Airlines,1094.0,45.0,21572.0,3944.0,7166.0,0.0,27853.0
+Totals,DEN,7,United Airlines,4549
+Delays,DEN,7,United Airlines,1376.0,40.0,22255.0,3867.0,10009.0,0.0,36332.0
+Totals,DEN,7,Southwest Airlines,5545
+Delays,DEN,7,Southwest Airlines,1702.0,17.0,28445.0,2612.0,8974.0,29.0,41237.0
+Totals,DFW,7,American Airlines,13163
+Delays,DFW,7,American Airlines,2693.0,38.0,49798.0,1737.0,19794.0,38.0,49235.0
+Totals,DFW,7,Alaska Airlines,155
+Delays,DFW,7,Alaska Airlines,13.0,0.0,350.0,41.0,116.0,0.0,252.0
+Totals,DFW,7,JetBlue Airways,58
+Delays,DFW,7,JetBlue Airways,8.0,0.0,44.0,31.0,60.0,0.0,174.0
+Totals,DFW,7,Delta Air Lines,539
+Delays,DFW,7,Delta Air Lines,60.0,1.0,2299.0,5.0,580.0,0.0,1311.0
+Totals,DFW,7,ExpressJet Airlines,2857
+Delays,DFW,7,ExpressJet Airlines,636.0,13.0,19188.0,0.0,3327.0,0.0,14360.0
+Totals,DFW,7,Frontier Airlines,123
+Delays,DFW,7,Frontier Airlines,20.0,1.0,87.0,0.0,653.0,0.0,532.0
+Totals,DFW,7,Envoy Air,4372
+Delays,DFW,7,Envoy Air,783.0,35.0,16966.0,3331.0,4900.0,145.0,13124.0
+Totals,DFW,7,Spirit Airlines,857
+Delays,DFW,7,Spirit Airlines,217.0,4.0,3189.0,35.0,5178.0,60.0,4259.0
+Totals,DFW,7,SkyWest Airlines,355
+Delays,DFW,7,SkyWest Airlines,80.0,3.0,1417.0,39.0,987.0,0.0,2576.0
+Totals,DFW,7,United Airlines,416
+Delays,DFW,7,United Airlines,116.0,5.0,2015.0,13.0,1992.0,0.0,3860.0
+Totals,IAH,7,American Airlines,878
+Delays,IAH,7,American Airlines,121.0,11.0,3149.0,103.0,1548.0,0.0,4007.0
+Totals,IAH,7,Alaska Airlines,53
+Delays,IAH,7,Alaska Airlines,2.0,0.0,0,0,0,0,0
+Totals,IAH,7,Delta Air Lines,343
+Delays,IAH,7,Delta Air Lines,41.0,1.0,591.0,0.0,734.0,0.0,1194.0
+Totals,IAH,7,ExpressJet Airlines,5467
+Delays,IAH,7,ExpressJet Airlines,602.0,38.0,12133.0,1096.0,8028.0,0.0,9271.0
+Totals,IAH,7,Frontier Airlines,155
+Delays,IAH,7,Frontier Airlines,45.0,1.0,1072.0,0.0,679.0,0.0,1525.0
+Totals,IAH,7,Spirit Airlines,527
+Delays,IAH,7,Spirit Airlines,187.0,7.0,3972.0,30.0,5253.0,67.0,3179.0
+Totals,IAH,7,SkyWest Airlines,1510
+Delays,IAH,7,SkyWest Airlines,418.0,31.0,11320.0,541.0,2039.0,386.0,6992.0
+Totals,IAH,7,United Airlines,5096
+Delays,IAH,7,United Airlines,1786.0,34.0,38036.0,1637.0,12181.0,0.0,38587.0
+Totals,LAS,7,American Airlines,1373
+Delays,LAS,7,American Airlines,207.0,9.0,4812.0,29.0,3777.0,36.0,8524.0
+Totals,LAS,7,Alaska Airlines,363
+Delays,LAS,7,Alaska Airlines,24.0,1.0,1210.0,16.0,355.0,0.0,558.0
+Totals,LAS,7,JetBlue Airways,413
+Delays,LAS,7,JetBlue Airways,118.0,5.0,520.0,196.0,1642.0,0.0,2855.0
+Totals,LAS,7,Delta Air Lines,1086
+Delays,LAS,7,Delta Air Lines,147.0,0.0,4782.0,37.0,2399.0,0.0,3759.0
+Totals,LAS,7,Frontier Airlines,444
+Delays,LAS,7,Frontier Airlines,144.0,2.0,2777.0,0.0,2982.0,0.0,4468.0
+Totals,LAS,7,Hawaiian Airlines,76
+Delays,LAS,7,Hawaiian Airlines,6.0,0.0,126.0,0.0,0.0,0.0,87.0
+Totals,LAS,7,Spirit Airlines,868
+Delays,LAS,7,Spirit Airlines,220.0,7.0,2234.0,88.0,4977.0,0.0,6245.0
+Totals,LAS,7,SkyWest Airlines,182
+Delays,LAS,7,SkyWest Airlines,27.0,2.0,519.0,58.0,83.0,0.0,865.0
+Totals,LAS,7,United Airlines,952
+Delays,LAS,7,United Airlines,208.0,10.0,2291.0,175.0,2648.0,0.0,6620.0
+Totals,LAS,7,Virgin America,330
+Delays,LAS,7,Virgin America,76.0,2.0,1036.0,55.0,2259.0,0.0,1928.0
+Totals,LAS,7,Southwest Airlines,6600
+Delays,LAS,7,Southwest Airlines,2210.0,27.0,38909.0,2114.0,9173.0,0.0,51834.0
+Totals,LAX,7,American Airlines,3559
+Delays,LAX,7,American Airlines,621.0,24.0,12072.0,538.0,7955.0,87.0,14760.0
+Totals,LAX,7,Alaska Airlines,808
+Delays,LAX,7,Alaska Airlines,101.0,4.0,962.0,0.0,1195.0,11.0,4480.0
+Totals,LAX,7,JetBlue Airways,399
+Delays,LAX,7,JetBlue Airways,93.0,1.0,1440.0,0.0,1737.0,0.0,1815.0
+Totals,LAX,7,Delta Air Lines,2661
+Delays,LAX,7,Delta Air Lines,630.0,2.0,9541.0,950.0,5559.0,70.0,13642.0
+Totals,LAX,7,Frontier Airlines,145
+Delays,LAX,7,Frontier Airlines,39.0,0.0,193.0,0.0,893.0,0.0,756.0
+Totals,LAX,7,Hawaiian Airlines,186
+Delays,LAX,7,Hawaiian Airlines,15.0,1.0,798.0,0.0,4.0,0.0,156.0
+Totals,LAX,7,Envoy Air,31
+Delays,LAX,7,Envoy Air,9.0,0.0,45.0,0.0,117.0,0.0,323.0
+Totals,LAX,7,Spirit Airlines,449
+Delays,LAX,7,Spirit Airlines,156.0,8.0,2136.0,21.0,3319.0,38.0,3706.0
+Totals,LAX,7,SkyWest Airlines,3461
+Delays,LAX,7,SkyWest Airlines,1045.0,80.0,20217.0,342.0,5621.0,43.0,38632.0
+Totals,LAX,7,United Airlines,2863
+Delays,LAX,7,United Airlines,930.0,31.0,16955.0,320.0,6024.0,0.0,28342.0
+Totals,LAX,7,Virgin America,1103
+Delays,LAX,7,Virgin America,281.0,3.0,2446.0,775.0,5593.0,131.0,6608.0
+Totals,LAX,7,Southwest Airlines,3706
+Delays,LAX,7,Southwest Airlines,1374.0,129.0,14728.0,969.0,9035.0,0.0,52722.0
+Totals,MSP,7,American Airlines,711
+Delays,MSP,7,American Airlines,107.0,8.0,1500.0,632.0,1221.0,0.0,2656.0
+Totals,MSP,7,Alaska Airlines,62
+Delays,MSP,7,Alaska Airlines,8.0,0.0,44.0,0.0,132.0,0.0,30.0
+Totals,MSP,7,Delta Air Lines,6140
+Delays,MSP,7,Delta Air Lines,885.0,2.0,22300.0,1760.0,12705.0,256.0,8989.0
+Totals,MSP,7,ExpressJet Airlines,617
+Delays,MSP,7,ExpressJet Airlines,128.0,8.0,3190.0,0.0,831.0,0.0,3646.0
+Totals,MSP,7,Frontier Airlines,204
+Delays,MSP,7,Frontier Airlines,59.0,3.0,957.0,10.0,2110.0,0.0,1922.0
+Totals,MSP,7,Spirit Airlines,310
+Delays,MSP,7,Spirit Airlines,123.0,8.0,1016.0,140.0,4088.0,51.0,2857.0
+Totals,MSP,7,SkyWest Airlines,2644
+Delays,MSP,7,SkyWest Airlines,320.0,8.0,5502.0,868.0,2471.0,0.0,7723.0
+Totals,MSP,7,United Airlines,386
+Delays,MSP,7,United Airlines,93.0,11.0,1524.0,91.0,1629.0,0.0,2454.0
+Totals,MSP,7,Southwest Airlines,740
+Delays,MSP,7,Southwest Airlines,187.0,4.0,1911.0,420.0,957.0,0.0,5917.0
+Totals,ORD,7,American Airlines,5301
+Delays,ORD,7,American Airlines,1348.0,42.0,23223.0,2512.0,15825.0,74.0,42604.0
+Totals,ORD,7,Alaska Airlines,196
+Delays,ORD,7,Alaska Airlines,19.0,0.0,144.0,0.0,443.0,0.0,342.0
+Totals,ORD,7,JetBlue Airways,278
+Delays,ORD,7,JetBlue Airways,72.0,5.0,1026.0,171.0,1836.0,19.0,2147.0
+Totals,ORD,7,Delta Air Lines,678
+Delays,ORD,7,Delta Air Lines,143.0,1.0,2570.0,570.0,1630.0,0.0,3904.0
+Totals,ORD,7,ExpressJet Airlines,4498
+Delays,ORD,7,ExpressJet Airlines,858.0,104.0,15409.0,2516.0,17151.0,0.0,24768.0
+Totals,ORD,7,Frontier Airlines,494
+Delays,ORD,7,Frontier Airlines,156.0,0.0,1761.0,48.0,5646.0,0.0,3637.0
+Totals,ORD,7,Envoy Air,6094
+Delays,ORD,7,Envoy Air,1213.0,139.0,14440.0,5636.0,14716.0,25.0,22945.0
+Totals,ORD,7,Spirit Airlines,1023
+Delays,ORD,7,Spirit Airlines,408.0,26.0,6877.0,957.0,8343.0,274.0,8045.0
+Totals,ORD,7,SkyWest Airlines,3542
+Delays,ORD,7,SkyWest Airlines,886.0,85.0,21235.0,2246.0,9286.0,286.0,20901.0
+Totals,ORD,7,United Airlines,5967
+Delays,ORD,7,United Airlines,2088.0,80.0,46452.0,4157.0,24646.0,0.0,52824.0
+Totals,ORD,7,Virgin America,152
+Delays,ORD,7,Virgin America,25.0,0.0,239.0,89.0,695.0,0.0,657.0
+Totals,PHX,7,American Airlines,5664
+Delays,PHX,7,American Airlines,972.0,27.0,24428.0,916.0,13329.0,291.0,14596.0
+Totals,PHX,7,Alaska Airlines,186
+Delays,PHX,7,Alaska Airlines,13.0,0.0,254.0,31.0,155.0,0.0,518.0
+Totals,PHX,7,JetBlue Airways,62
+Delays,PHX,7,JetBlue Airways,17.0,0.0,146.0,0.0,58.0,0.0,509.0
+Totals,PHX,7,Delta Air Lines,642
+Delays,PHX,7,Delta Air Lines,72.0,0.0,4584.0,142.0,669.0,0.0,1567.0
+Totals,PHX,7,ExpressJet Airlines,2
+Delays,PHX,7,ExpressJet Airlines,1.0,0.0,15.0,0.0,18.0,0.0,0.0
+Totals,PHX,7,Frontier Airlines,155
+Delays,PHX,7,Frontier Airlines,39.0,1.0,950.0,7.0,1050.0,0.0,2076.0
+Totals,PHX,7,Hawaiian Airlines,31
+Delays,PHX,7,Hawaiian Airlines,1.0,0.0,310.0,0.0,0.0,0.0,0.0
+Totals,PHX,7,Spirit Airlines,62
+Delays,PHX,7,Spirit Airlines,11.0,0.0,132.0,0.0,277.0,0.0,162.0
+Totals,PHX,7,SkyWest Airlines,2036
+Delays,PHX,7,SkyWest Airlines,307.0,21.0,6527.0,1524.0,3327.0,91.0,9848.0
+Totals,PHX,7,United Airlines,309
+Delays,PHX,7,United Airlines,70.0,0.0,1359.0,181.0,845.0,0.0,1498.0
+Totals,PHX,7,Southwest Airlines,5125
+Delays,PHX,7,Southwest Airlines,1726.0,14.0,26088.0,1245.0,9412.0,49.0,41935.0
+Totals,SFO,7,American Airlines,1449
+Delays,SFO,7,American Airlines,238.0,8.0,6076.0,0.0,3531.0,0.0,6409.0
+Totals,SFO,7,Alaska Airlines,488
+Delays,SFO,7,Alaska Airlines,73.0,0.0,848.0,0.0,560.0,22.0,3161.0
+Totals,SFO,7,JetBlue Airways,461
+Delays,SFO,7,JetBlue Airways,124.0,2.0,857.0,0.0,932.0,0.0,4234.0
+Totals,SFO,7,Delta Air Lines,1141
+Delays,SFO,7,Delta Air Lines,229.0,3.0,1785.0,0.0,3549.0,0.0,6345.0
+Totals,SFO,7,Frontier Airlines,185
+Delays,SFO,7,Frontier Airlines,47.0,0.0,750.0,0.0,1535.0,0.0,1464.0
+Totals,SFO,7,Hawaiian Airlines,62
+Delays,SFO,7,Hawaiian Airlines,9.0,1.0,2087.0,0.0,0.0,1.0,0.0
+Totals,SFO,7,SkyWest Airlines,3102
+Delays,SFO,7,SkyWest Airlines,641.0,75.0,12101.0,87.0,3342.0,0.0,17802.0
+Totals,SFO,7,United Airlines,4685
+Delays,SFO,7,United Airlines,1371.0,33.0,24868.0,56.0,8975.0,0.0,29927.0
+Totals,SFO,7,Virgin America,1500
+Delays,SFO,7,Virgin America,305.0,3.0,2878.0,235.0,5624.0,196.0,7106.0
+Totals,SFO,7,Southwest Airlines,1371
+Delays,SFO,7,Southwest Airlines,432.0,50.0,4179.0,256.0,3787.0,0.0,13673.0
