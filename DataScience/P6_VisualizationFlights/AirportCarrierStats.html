@@ -10,7 +10,7 @@
 </div>
 <!-- <select id="airport" onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value + '&timeframe=' + document.getElementById('timeframe').value" name="airport">
  -->  
-<label>Airport: </label>
+<label class="InputLabel">Airport: </label>
 <!-- <select id="airport" onChange="window.location.href=buildUrl()" name="airport"> -->
 <select id="airport" name="airport">
   <option id="ATL" value="ATL">Atlanta International</option>
@@ -24,7 +24,7 @@
   <option id="PHX" value="PHX">Phoenix Sky Harbor</option>
   <option id="SFO" value="SFO">San Francisco International</option>
 </select><br>
-<label>Timeframe: </label>
+<label class="InputLabel">Timeframe: </label>
 <!-- <select id="timeframe" onchange="window.location.href=buildUrl()" name="timeframe"> -->
 <select id="timeframe" name="timeframe">
   <option id="annual" value="annual">Annual</option>
@@ -42,13 +42,15 @@
   <option id="dec" value="dec">December</option>
 </select>
 <br>
-Flight Count Axis: <input id="test" type="range"/>
+<label class="InputLabel">Y Axis Scale:</label>&nbsp;<label class="InputLabel" id="yScaleDisplay"></label><input id="yAxisScale" type="range" value="100" step="10"/>
 
-<button onclick='updateChart()'>Click Me</button>
+<!-- <button onclick='updateChart()'>Click Me</button> -->
 <div id="chartContainer">
   <script src="lib/d3.v3.4.12.min.js"></script>
   <script src="lib/dimple.v2.1.6.min.js"></script>
   <script type="text/javascript">
+
+  var originalYMax = 0;
 
     // var AIRLINE_DATA = null;
 
@@ -73,6 +75,9 @@ Flight Count Axis: <input id="test" type="range"/>
     function updateChart() {
       var selectedAirport = document.getElementById('airport').value;
       var selectedTimeframe = document.getElementById('timeframe').value;
+      var yAxisScaleControl = document.getElementById('yAxisScale');
+      yAxisScaleControl.value = 100;
+      d3.select("#yScaleDisplay").text("100%")
 
       console.log("Updating chart with new parameters:");
       console.log("Selected Airport: " + selectedAirport);
@@ -86,12 +91,21 @@ Flight Count Axis: <input id="test" type="range"/>
           return originAirportMatch;
         });
 
+        // Remove any existing data
+        if (myChart.series.length > 0) {
+          myChart.series.splice(0,1);
+          myChart.addSeries(["RecordType"], dimple.plot.bar);
+        }
+
         // debugger;
         myChart.data = chartData;
+        myChart.axes[1].overrideMax = null;
         myChart.series[0].getTooltipText = function(e) {
           return buildTooltip(e, chartData);
         };
-        myChart.draw(1000);
+        myChart.draw(500);
+        originalYMax = myChart.axes[1]._max;
+        // debugger;
       });
 
     }
@@ -118,7 +132,18 @@ Flight Count Axis: <input id="test" type="range"/>
       var returnValue = "";
 
       if (recordType === "OnTime") {
-        returnValue = [`On-Time Flights = ${formatLargeNumber(e.yValue)}`];
+        var onTimeFlights = e.yValue;
+        var delayedFilter = chartDataSet.filter(function(row) {
+          return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
+        })
+        var delayedFlights = delayedFilter.reduce(function(a, b) {
+          return a + parseFloat(b['Count']);
+        }, 0);
+        const totalFlights = onTimeFlights + delayedFlights;
+        const onTimeFlightsDisplay = formatLargeNumber(onTimeFlights);
+        const onTimePercent = onTimeFlights / totalFlights;
+        const onTimePercentDisplay = formatPercent(onTimePercent);
+        returnValue = [`On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`];
       } else {
           var filtered = chartDataSet.filter(function(row) {
             return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
@@ -191,7 +216,9 @@ Flight Count Axis: <input id="test" type="range"/>
 
     var myChart = new dimple.chart(svg, null);
     myChart.setBounds(60, 45, 510, 315);
-    myChart.addCategoryAxis("x", "CarrierName");
+    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
+//    debugger;
+//    carrierAxis.titleShape.text("Airline");
     myChart.addMeasureAxis("y", "Count");
     var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
     myChart.addLegend(200, 10, 380, 20, "right");
@@ -201,6 +228,14 @@ Flight Count Axis: <input id="test" type="range"/>
 
     d3.select("#airport").on("change", function() {updateChart()});
     d3.select("#timeframe").on("change", function() {updateChart()});
+    d3.select("#yAxisScale").on("change", function() {
+      const scaleValue = this.value;
+      const newMax = 1.0 * scaleValue / 100 * originalYMax;
+      // debugger;
+      d3.select("#yScaleDisplay").text(scaleValue + "%")
+      myChart.axes[1].overrideMax = newMax;
+      myChart.draw(500);
+    })
 
 
   </script>
