@@ -79,6 +79,10 @@ Allowing a reader to select a specific airport and time frame make the visualiza
 
 After preparing an early draft of the visualization, I sent out a request for feedback on Facebook. The early draft had two input parameters: Airport and Timeframe based on the User Interface. Changing a parameter triggered a page refresh where the chart and input controls would be redrawn.
 
+Here is a link to a Plunker URL that hosts the original code:
+
+[First Draft](https://plnkr.co/edit/jgJ0xviNmN3QDkMoz2l8?p=preview)
+
 Early comments:
 
 * From Anna (mom) - The page refresh is distracting. Airport and Timeframe flicker and look funny when I change it.
@@ -93,6 +97,10 @@ To address these issues, I added the following features:
 3. Used Javascript to update the chart (instead of refreshing the entire page every time)
 4. Added a zoom slider control so that readers can zoom into a chart (reduce the scale) to see smaller airlines.
 5. Added a new "All Airports" airport option and made this the default. The visualization now starts off with data on all flights departing from all top 10 airports.
+
+Here is a link to a Plunker URL that hosts the final code:
+
+[Final Draft](https://plnkr.co/edit/guZWcsDBUdvZvm8dAfWE?p=preview)
 
 ## Resources
 
