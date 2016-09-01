@@ -4,68 +4,72 @@
 </head>
 
 <body>
-<div>
-<h2 id="ChartTitle">Airline OnTime Performance at US Top10 Airports</h2>
 
-</div>
-<!-- <select id="airport" onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value + '&timeframe=' + document.getElementById('timeframe').value" name="airport">
- -->  
-<label class="InputLabel">Airport: </label>
-<!-- <select id="airport" onChange="window.location.href=buildUrl()" name="airport"> -->
-<select id="airport" name="airport">
-  <option id="000" value="000">All Airports</option>
-  <option id="ATL" value="ATL">Atlanta International</option>
-  <option id="ORD" value="ORD">Chicago O'Hare</option>
-  <option id="DFW" value="DFW">Dallas / Fort Worth</option>
-  <option id="DEN" value="DEN">Denver International</option>
-  <option id="IAH" value="IAH">Houston Intercontinental</option>
-  <option id="LAS" value="LAS">Las Vegas McCarran</option>
-  <option id="LAX" value="LAX">Los Angeles International</option>
-  <option id="MSP" value="MSP">Minneapolis St Paul</option>
-  <option id="PHX" value="PHX">Phoenix Sky Harbor</option>
-  <option id="SFO" value="SFO">San Francisco International</option>
-</select><br>
-<label class="InputLabel">Timeframe: </label>
-<!-- <select id="timeframe" onchange="window.location.href=buildUrl()" name="timeframe"> -->
-<select id="timeframe" name="timeframe">
-  <option id="annual" value="annual">Annual</option>
-  <option id="jan" value="jan">January</option>
-  <option id="feb" value="feb">February</option>
-  <option id="mar" value="mar">March</option>
-  <option id="apr" value="apr">April</option>
-  <option id="may" value="may">May</option>
-  <option id="jun" value="jun">June</option>
-  <option id="jul" value="jul">July</option>
-  <option id="aug" value="aug">August</option>
-  <option id="sep" value="sep">September</option>
-  <option id="oct" value="oct">October</option>
-  <option id="nov" value="nov">November</option>
-  <option id="dec" value="dec">December</option>
-</select>
+  <!-- Chart Title -->
+  <div>
+    <h2 id="ChartTitle">Airline OnTime Performance at US Top10 Airports</h2>
+  </div>
+
+  <!-- Airport Selection Control -->
+  <label class="InputLabel">Airport: </label>
+
+  <select id="airport" name="airport">
+    <option id="000" value="000">All Airports</option>
+    <option id="ATL" value="ATL">Atlanta International</option>
+    <option id="ORD" value="ORD">Chicago O'Hare</option>
+    <option id="DFW" value="DFW">Dallas / Fort Worth</option>
+    <option id="DEN" value="DEN">Denver International</option>
+    <option id="IAH" value="IAH">Houston Intercontinental</option>
+    <option id="LAS" value="LAS">Las Vegas McCarran</option>
+    <option id="LAX" value="LAX">Los Angeles International</option>
+    <option id="MSP" value="MSP">Minneapolis St Paul</option>
+    <option id="PHX" value="PHX">Phoenix Sky Harbor</option>
+    <option id="SFO" value="SFO">San Francisco International</option>
+  </select>
+  <br>
+
+  <!-- TimeFrame Selection Control -->
+  <label class="InputLabel">Timeframe: </label>
+
+  <select id="timeframe" name="timeframe">
+    <option id="annual" value="annual">Annual</option>
+    <option id="jan" value="jan">January</option>
+    <option id="feb" value="feb">February</option>
+    <option id="mar" value="mar">March</option>
+    <option id="apr" value="apr">April</option>
+    <option id="may" value="may">May</option>
+    <option id="jun" value="jun">June</option>
+    <option id="jul" value="jul">July</option>
+    <option id="aug" value="aug">August</option>
+    <option id="sep" value="sep">September</option>
+    <option id="oct" value="oct">October</option>
+    <option id="nov" value="nov">November</option>
+    <option id="dec" value="dec">December</option>
+  </select>
 <br>
-<label class="InputLabel">Y Axis Scale:</label>&nbsp;<label class="InputLabel" id="yScaleDisplay"></label><input id="yAxisScale" type="range" value="100" step="10"/>
 
-<!-- <button onclick='updateChart()'>Click Me</button> -->
+<!-- Y Axis Zoom Control -->
+<label class="InputLabel">Y Axis Zoom:</label>&nbsp;
+<label class="InputLabel" id="zoomLevelDisplay"></label>
+<input id="zoomLevel" type="range" value="100" min="100" max="5000" step="50"/>
+
 <div id="chartContainer">
   <script src="lib/d3.v3.4.8.js" charset="utf-8"></script>
   <script src="lib/dimple.v2.2.0.js"></script>
   <script type="text/javascript">
 
-  var originalYMax = 0;
+    // For the zoom control, we need to store the Y axis maximum value at 100% zoom.
+    var originalYMax = 0;
 
-    // var AIRLINE_DATA = null;
-
-    // function buildUrl() {
-    //   return `AirportCarrierStats.html?airport=${document.getElementById('airport').value}&timeframe=${document.getElementById('timeframe').value}`
-    // }
-
+    // Format (ontime, delayed) percentage values for tooltips
     function formatPercent(aPercentage) {
       return (Math.round(aPercentage.toFixed(2) * 100)).toString() + "%"
     }
 
-    // Copied from here: http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+    // Format large numbers (flight counts, delayed minutes) for tooltips
+    // Regex expression copied from:
+    // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
     function formatLargeNumber(aNumber) {
-      // return Number(aNumber).toLocaleString();
       return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
     }
 
@@ -76,16 +80,16 @@
     function updateChart() {
       var selectedAirport = document.getElementById('airport').value;
       var selectedTimeframe = document.getElementById('timeframe').value;
-      var yAxisScaleControl = document.getElementById('yAxisScale');
-      yAxisScaleControl.value = 100;
-      d3.select("#yScaleDisplay").text("100%")
 
-      console.log("Updating chart with new parameters:");
-      console.log("Selected Airport: " + selectedAirport);
-      console.log("Selected Timeframe: " + selectedTimeframe);
+      // Reset zoom control (and associated label) to 100% zoom 
+      var zoomLevelControl = document.getElementById('zoomLevel');
+      zoomLevelControl.value = 100;
+      d3.select("#zoomLevelDisplay").text("100%")
 
+      // Setup associated data file (either annual or 1-month of data)
       var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 
+      // Load the file and setup the chart data
       d3.csv(filename, function (data) {
 
         // Filter data by origin (if airport selected)
@@ -93,7 +97,7 @@
           // Do not filter any data. We want all airports
           chartData = data;
         } else {
-          // Filter out the data for one airport
+          // Filter out the data for a single airport
           chartData = data.filter(function(row) {
             var originAirportMatch = row['Origin'] === selectedAirport;
             return originAirportMatch;
@@ -110,6 +114,12 @@
           return aRow;
         })
 
+        // When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
+        // I see error messages in the console.
+        //
+        // This happens when a user transitions from a large airport with many airlines (i.e. LAX) to a smaller airport (i.e. IAH).
+        // 
+        // To get araound this, I remove any existing bar charts and redraw the chart from scratch.
         if (myChart.series) {
           myChart.series.forEach(function(series){
             if (series.shapes) {
@@ -118,36 +128,28 @@
           });
           myChart.series.splice(0, 1);
         }
-
         myChart.addSeries(["RecordType"], dimple.plot.bar)
 
+        // Reset the chart data, reset the y-axis zoom, and update the tooltips
         myChart.data = chartData;
         myChart.axes[1].overrideMax = null;
         myChart.series[0].getTooltipText = function(e) {
           return buildTooltip(e, chartData);
         };
         myChart.series[0].tooltipFontSize="12px";
+
+        // Now refresh the chart
         myChart = myChart.draw(500,false);
+
+        // Update the maximum Y axis value (for zoom calculations)
         originalYMax = myChart.axes[1]._max;
       });
 
     }
 
-    function getQueryVariable(variable) {
-        var query = window.location.search.substring(1);
-        var vars = query.split('&');
-        for (var i = 0; i < vars.length; i++) {
-            var pair = vars[i].split('=');
-            if (decodeURIComponent(pair[0]) == variable) {
-                return decodeURIComponent(pair[1]);
-            }
-        }
-        console.log('Query variable %s not found', variable);
-    }
-
+    // Code for setting the tooltip text
+    // This code calculates on-time and delayed percentages in addition to displaying the numbers.
     function buildTooltip(e, chartDataSet) {
-      console.log("In buildTooltip method...");
-      console.log("Value of e is: "  + e);
       var key = e.key;
       var fields = key.split("_");
       var recordType = fields[0];
@@ -155,6 +157,7 @@
       var returnValue = "";
 
       if (recordType === "OnTime") {
+        // For ontime data, show the # of on-time flights and on-time percentage
         var onTimeFlights = e.yValue;
         var delayedFilter = chartDataSet.filter(function(row) {
           return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
@@ -172,96 +175,87 @@
             `On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`
         ];
       } else {
-          var filtered = chartDataSet.filter(function(row) {
-            return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
-          })
-          var ontimeFilter = chartDataSet.filter(function(row) {
-            return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
-          })
-          var ontimeFlights = ontimeFilter.reduce(function(a, b) {
-            return a + parseFloat(b['Count']);
-          }, 0);
-          var delayedFlights = e.yValue;
-          console.log(`Delayed flights = ${delayedFlights}`)
-          console.log(`On-Time flights = ${ontimeFlights}`)
-          var totalFlights = ontimeFlights + delayedFlights;
-          var delayedPercent = delayedFlights / totalFlights; 
+        // For delayed data, show the # of delayed flights, percentage, and delay reasons
+        var filtered = chartDataSet.filter(function(row) {
+          return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
+        })
+        var ontimeFilter = chartDataSet.filter(function(row) {
+          return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
+        })
+        var ontimeFlights = ontimeFilter.reduce(function(a, b) {
+          return a + parseFloat(b['Count']);
+        }, 0);
+        var delayedFlights = e.yValue;
+        console.log(`Delayed flights = ${delayedFlights}`)
+        console.log(`On-Time flights = ${ontimeFlights}`)
+        var totalFlights = ontimeFlights + delayedFlights;
+        var delayedPercent = delayedFlights / totalFlights; 
 
-          var delayedMins = filtered.reduce(function(a, b) {
-            return a + parseFloat(b['ArrDelayMins']);
-          }, 0);
-          var carrierDelayMins = filtered.reduce(function(a, b) {
-            return a + parseFloat(b['CarrierDelayMins']);
-          }, 0);
-          console.log("Delayed mins = " + delayedMins)
-          console.log("Carrier Delay mins = " + carrierDelayMins)
-          var weatherDelayMins = filtered.reduce(function(a, b) {
-            return a + parseFloat(b['WeatherDelayMins']);
-          }, 0);
-          var nasDelayMins = filtered.reduce(function(a, b) {
-            return a + parseFloat(b['NasDelayMins']);
-          }, 0);
-          var securityDelayMins = filtered.reduce(function(a, b) {
-            return a + parseFloat(b['SecurityDelayMins']);
-          }, 0);
-          var lateAircraftDelayMins = filtered.reduce(function(a, b) {
-            return a + parseFloat(b['LateAircraftDelayMins']);
-          }, 0);
+        var delayedMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['ArrDelayMins']);
+        }, 0);
+        var carrierDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['CarrierDelayMins']);
+        }, 0);
+        console.log("Delayed mins = " + delayedMins)
+        console.log("Carrier Delay mins = " + carrierDelayMins)
+        var weatherDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['WeatherDelayMins']);
+        }, 0);
+        var nasDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['NasDelayMins']);
+        }, 0);
+        var securityDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['SecurityDelayMins']);
+        }, 0);
+        var lateAircraftDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['LateAircraftDelayMins']);
+        }, 0);
 
-          returnValue = [`Airline: ${carrier}`,
-            `Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
-            `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
-            `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
-            `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
-            `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
-            `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
-            ];
+        returnValue = [`Airline: ${carrier}`,
+          `Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
+          `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
+          `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
+          `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
+          `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
+          `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
+        ];
       }
-      console.log("KEY = " + key);
-      console.log("ReturnValue is: " + returnValue);
-      console.log("Leaving buildTooltip method...")
       return returnValue;
     }
 
-
-    const selectedAirport = d3.select("#airport").node().value;
-    console.log("Selected airport is: " + selectedAirport);
-
-    // document.getElementById(selectedAirport).selected=true;
-    // document.getElementById(selectedTimeframe).selected=true;
-
-
+    // Create a SVG container for our bar chart
     var svg = dimple.newSvg("#chartContainer", 590, 400);
-    // var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 
     var myChart = new dimple.chart(svg, null);
     myChart.setBounds(60, 45, 510, 250);
 
+    // X axis
     var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
     carrierAxis.title = "Airlines";
     carrierAxis.fontSize = "12px";
 
-    yAxis = myChart.addMeasureAxis("y", "Count");
-    yAxis.title = "Flights";
-    yAxis.fontSize = "12px";
+    // Y Axis
+    var flightsAxis = myChart.addMeasureAxis("y", "Count");
+    flightsAxis.title = "Flights";
+    flightsAxis.fontSize = "12px";
 
+    // Series data and chart type
     var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
     myChart.addLegend(200, 10, 380, 20, "right");
-
-    // myChart.defaultColors = [
-    //   new dimple.color("#333333"),
-    //   new dimple.color("#666666")
-    // ]
 
     // Draw the chart for the first time
     updateChart();
 
+    // For airport and time frame selection controls, update the chart when the value changes
     d3.select("#airport").on("change", function() {updateChart()});
     d3.select("#timeframe").on("change", function() {updateChart()});
-    d3.select("#yAxisScale").on("change", function() {
-      const scaleValue = this.value;
-      const newMax = 1.0 * scaleValue / 100 * originalYMax;
-      d3.select("#yScaleDisplay").text(scaleValue + "%")
+
+    // Zoom updates
+    d3.select("#zoomLevel").on("change", function() {
+      const zoomLevelValue = this.value;
+      const newMax = 1.0 * originalYMax / (zoomLevelValue / 100);
+      d3.select("#zoomLevelDisplay").text(zoomLevelValue + "%")
       myChart.axes[1].overrideMax = newMax;
       myChart.draw(500);
     })
@@ -270,23 +264,22 @@
   </script>
 </div>
 <div>
-<p>
-<p>Carrier On-Time Performance for America's Top 10 Airports
 
-Based on domestic departures
-US Department of Transportation - Bureau of Transportation Statistics</p>
-
+<p>This chart summarizes on-time performance for domestic flights at America's Top 10 Airports. The data for this chart is provided by the US Bureau of Transportation Statistics on <a href="http://www.transtats.bts.gov/OT_Delay/OT_DelayCause1.asp">their website</a>.
 
 Some observations:<br>
 <UL>
   <LI>
-  Flight delays are not consistent across carriers (even at the same airport in the same month). Some carriers are 'worse' than others.<br>
+  Flight delays are not consistent across carriers (even at the same airport in the same month). In June, 41% of all United Airlines flights originating from Chicago O'Hare were delayed. Only 30% of American Airlines (a similarly sized carrier) flights were delayed.<br>
   </LI>
   <LI>
-  Cold weather not always a lead factor in flight delays. United Airlines performance at Chicago in June was abysmal. 41% of the flights were delayed versus 29% in cold Chicago January!
+  Cold weather is not always a lead factor in flight delays. United Airlines on-time performance in June (59%) was actually lower than in January (71%) despite Chicago's reputation for cold and extreme winters.
   </LI>
   <LI>
   As much as people complain about time spent in airport security, security is rarely a factor in flight delays.
+  </LI>
+  <LI>
+  Carrier size and on-time percentage are not correlated. The two best performing airlines (by on-time percentage) are Delta Airlines (the largest carrier) and Alaska Airlines (one of the smallest).
   </LI>
 
 </p>
