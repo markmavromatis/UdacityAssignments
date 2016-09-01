@@ -66,12 +66,12 @@ With simple APIs, I could focus more time on interactivity features rather than 
 
 This assignment is about creating a visualization with a hybrid narrative that is both author-driven and reader-driven. By keeping the user interface simple, I felt that I could present a story at a high level summary view (annual data) then allowing readers to filter that data to airports of interest or a specific timeframe. I would like my readers to answer questions such as:
 
-"Which airlines are the largest?"
-"Which airlines have the best on-time percentages?"
-"Which airlines fly out of my airport?"
-"Which airines have the best on-time percentage at my airport?"
-"Which airines fly the most often at my airport?"
-"If I have to fly through a hub airport in January, which one should I use? Does it make a difference?"
+* *"Which airlines are the largest?"*
+* *"Which airlines have the best on-time percentages?"*
+* *"Which airlines fly out of my airport?"*
+* *"Which airines have the best on-time percentage at my airport?"*
+* *"Which airines fly the most often at my airport?"*
+* *"If I have to fly through a hub airport in January, which one should I use? Does it make a difference?"*
 
 Allowing a reader to select a specific airport and time frame make the visualization personal and more useful.
 
@@ -96,7 +96,7 @@ To address these issues, I added the following features:
 
 ## Resources
 
-[DimpleJS](http://dimplejs.org) - JavaScript-based Visualization API for creating charts
-[StackOverflow](http://www.stackoverflow.com/) - General source for troubleshooting JavaScript and Dimple issues
-[Research and Innovative Technology Administration](http://www.rita.dot.gov) - Website that hosts the flight data used for this visualization.
+* [DimpleJS](http://dimplejs.org) - JavaScript-based Visualization API for creating charts
+* [StackOverflow](http://www.stackoverflow.com/) - General source for troubleshooting JavaScript and Dimple issues
+* [Research and Innovative Technology Administration](http://www.rita.dot.gov) - Website that hosts the flight data used for this visualization.
 
