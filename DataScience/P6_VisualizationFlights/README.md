@@ -20,15 +20,15 @@ Udacity provided links to older flight data that contained some carriers (i.e. C
 
 The webite provides already aggregated data, but I decided to use my newly obtained MongoDB skills to build my own data using the raw (23MB / month) flight data from here:
 
-http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time
+[Flight OnTime Performance Data](http://www.transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time)
 
 I imported the raw data .csv files into a MongoDB database:
 
-mongoimport --collection flights2015 --type csv --file 2015_airline_delay_causes_Jan.csv --headerline
+`mongoimport --collection flights2015 --type csv --file 2015_airline_delay_causes_Jan.csv --headerline`
 
 From the raw flight data, I identified the top 10 US airports by origin:
 
-db.flights2015.aggregate([{$group:{_id: “$Origin”, total : {$sum : 1}}}, {$sort : {total : -1}}])
+`db.flights2015.aggregate([{$group:{_id: “$Origin”, total : {$sum : 1}}}, {$sort : {total : -1}}])`
 
 I then used Python (getAirportCarrierStatistics.py) to aggregate the statistics and publish .csv files with the summary statistics for each month. 
 
