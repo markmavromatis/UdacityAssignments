@@ -13,6 +13,7 @@
 <label class="InputLabel">Airport: </label>
 <!-- <select id="airport" onChange="window.location.href=buildUrl()" name="airport"> -->
 <select id="airport" name="airport">
+  <option id="000" value="000">All Airports</option>
   <option id="ATL" value="ATL">Atlanta International</option>
   <option id="ORD" value="ORD">Chicago O'Hare</option>
   <option id="DFW" value="DFW">Dallas / Fort Worth</option>
@@ -46,8 +47,8 @@
 
 <!-- <button onclick='updateChart()'>Click Me</button> -->
 <div id="chartContainer">
-  <script src="lib/d3.v3.4.12.min.js"></script>
-  <script src="lib/dimple.v2.1.6.min.js"></script>
+  <script src="lib/d3.v3.4.8.js" charset="utf-8"></script>
+  <script src="lib/dimple.v2.2.0.js"></script>
   <script type="text/javascript">
 
   var originalYMax = 0;
@@ -86,26 +87,48 @@
       var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 
       d3.csv(filename, function (data) {
-        chartData = data.filter(function(row) {
-          var originAirportMatch = row['Origin'] === selectedAirport;
-          return originAirportMatch;
-        });
 
-        // Remove any existing data
-        if (myChart.series.length > 0) {
-          myChart.series.splice(0,1);
-          myChart.addSeries(["RecordType"], dimple.plot.bar);
+        // Filter data by origin (if airport selected)
+        if (selectedAirport == "000") {
+          // Do not filter any data. We want all airports
+          chartData = data;
+        } else {
+          // Filter out the data for one airport
+          chartData = data.filter(function(row) {
+            var originAirportMatch = row['Origin'] === selectedAirport;
+            return originAirportMatch;
+          });
         }
 
-        // debugger;
+        // Change airline names to their prefix (i.e. 'American Airlines' -> 'American')
+        chartData = chartData.map(function(aRow) {
+          // If the carrier name contains a space, then just keep the prefix
+          // otherwise, display entire airline name
+          const carrierFullName = aRow['CarrierName'];
+          const carrierDisplayName = carrierFullName.indexOf(' ') > -1 ? carrierFullName.split(' ')[0] : carrierFullName;
+          aRow['CarrierName'] = carrierDisplayName;
+          return aRow;
+        })
+
+        if (myChart.series) {
+          myChart.series.forEach(function(series){
+            if (series.shapes) {
+              series.shapes.remove();
+            }
+          });
+          myChart.series.splice(0, 1);
+        }
+
+        myChart.addSeries(["RecordType"], dimple.plot.bar)
+
         myChart.data = chartData;
         myChart.axes[1].overrideMax = null;
         myChart.series[0].getTooltipText = function(e) {
           return buildTooltip(e, chartData);
         };
-        myChart.draw(500);
+        myChart.series[0].tooltipFontSize="12px";
+        myChart = myChart.draw(500,false);
         originalYMax = myChart.axes[1]._max;
-        // debugger;
       });
 
     }
@@ -143,7 +166,11 @@
         const onTimeFlightsDisplay = formatLargeNumber(onTimeFlights);
         const onTimePercent = onTimeFlights / totalFlights;
         const onTimePercentDisplay = formatPercent(onTimePercent);
-        returnValue = [`On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`];
+        returnValue = [
+            `Airline: ${carrier}`,
+            `  `,
+            `On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`
+        ];
       } else {
           var filtered = chartDataSet.filter(function(row) {
             return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
@@ -159,7 +186,7 @@
           console.log(`On-Time flights = ${ontimeFlights}`)
           var totalFlights = ontimeFlights + delayedFlights;
           var delayedPercent = delayedFlights / totalFlights; 
-          // debugger;
+
           var delayedMins = filtered.reduce(function(a, b) {
             return a + parseFloat(b['ArrDelayMins']);
           }, 0);
@@ -180,8 +207,9 @@
           var lateAircraftDelayMins = filtered.reduce(function(a, b) {
             return a + parseFloat(b['LateAircraftDelayMins']);
           }, 0);
-          // debugger;
-          returnValue = [`Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
+
+          returnValue = [`Airline: ${carrier}`,
+            `Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
             `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
             `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
             `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
@@ -195,14 +223,6 @@
       return returnValue;
     }
 
-    // var selectedAirport = getQueryVariable('airport');
-    // var selectedTimeframe = getQueryVariable('timeframe');
-//    debugger;
-
-    // Set defaults if no airport or timeframe is selected
-    // (i.e. first time the page is open)
-    // if (!selectedAirport) {selectedAirport = 'ATL';}
-    // if (!selectedTimeframe) {selectedTimeframe = 'annual';}
 
     const selectedAirport = d3.select("#airport").node().value;
     console.log("Selected airport is: " + selectedAirport);
@@ -215,13 +235,23 @@
     // var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 
     var myChart = new dimple.chart(svg, null);
-    myChart.setBounds(60, 45, 510, 315);
+    myChart.setBounds(60, 45, 510, 250);
+
     var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
-//    debugger;
-//    carrierAxis.titleShape.text("Airline");
-    myChart.addMeasureAxis("y", "Count");
+    carrierAxis.title = "Airlines";
+    carrierAxis.fontSize = "12px";
+
+    yAxis = myChart.addMeasureAxis("y", "Count");
+    yAxis.title = "Flights";
+    yAxis.fontSize = "12px";
+
     var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
     myChart.addLegend(200, 10, 380, 20, "right");
+
+    // myChart.defaultColors = [
+    //   new dimple.color("#333333"),
+    //   new dimple.color("#666666")
+    // ]
 
     // Draw the chart for the first time
     updateChart();
@@ -231,7 +261,6 @@
     d3.select("#yAxisScale").on("change", function() {
       const scaleValue = this.value;
       const newMax = 1.0 * scaleValue / 100 * originalYMax;
-      // debugger;
       d3.select("#yScaleDisplay").text(scaleValue + "%")
       myChart.axes[1].overrideMax = newMax;
       myChart.draw(500);
