@@ -41,6 +41,8 @@
   <option id="nov" value="nov">November</option>
   <option id="dec" value="dec">December</option>
 </select>
+<br>
+Flight Count Axis: <input id="test" type="range"/>
 
 <button onclick='updateChart()'>Click Me</button>
 <div id="chartContainer">
@@ -48,11 +50,11 @@
   <script src="lib/dimple.v2.1.6.min.js"></script>
   <script type="text/javascript">
 
-    var AIRLINE_DATA = null;
+    // var AIRLINE_DATA = null;
 
-    function buildUrl() {
-      return `AirportCarrierStats.html?airport=${document.getElementById('airport').value}&timeframe=${document.getElementById('timeframe').value}`
-    }
+    // function buildUrl() {
+    //   return `AirportCarrierStats.html?airport=${document.getElementById('airport').value}&timeframe=${document.getElementById('timeframe').value}`
+    // }
 
     function formatPercent(aPercentage) {
       return (Math.round(aPercentage.toFixed(2) * 100)).toString() + "%"
@@ -64,9 +66,6 @@
       return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
     }
 
-    function filterData(selectedAirport, selectedTimeframe) {
-
-    }
 
 
     // Update the chart using Javascript
@@ -74,20 +73,26 @@
     function updateChart() {
       var selectedAirport = document.getElementById('airport').value;
       var selectedTimeframe = document.getElementById('timeframe').value;
+
       console.log("Updating chart with new parameters:");
       console.log("Selected Airport: " + selectedAirport);
       console.log("Selected Timeframe: " + selectedTimeframe);
 
-      chartData = AIRLINE_DATA.filter(function(row) {
-        return row['Origin'] === selectedAirport;
-      });
+      var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 
-      // debugger;
-      myChart.data = chartData;
-      myChart.series[0].getTooltipText = function(e) {
-        return buildTooltip(e, chartData);
-      };
-      myChart.draw(1000);
+      d3.csv(filename, function (data) {
+        chartData = data.filter(function(row) {
+          var originAirportMatch = row['Origin'] === selectedAirport;
+          return originAirportMatch;
+        });
+
+        // debugger;
+        myChart.data = chartData;
+        myChart.series[0].getTooltipText = function(e) {
+          return buildTooltip(e, chartData);
+        };
+        myChart.draw(1000);
+      });
 
     }
 
@@ -115,10 +120,10 @@
       if (recordType === "OnTime") {
         returnValue = [`On-Time Flights = ${formatLargeNumber(e.yValue)}`];
       } else {
-          var filtered = data2.filter(function(row) {
+          var filtered = chartDataSet.filter(function(row) {
             return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
           })
-          var ontimeFilter = data2.filter(function(row) {
+          var ontimeFilter = chartDataSet.filter(function(row) {
             return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
           })
           var ontimeFlights = ontimeFilter.reduce(function(a, b) {
@@ -165,23 +170,24 @@
       return returnValue;
     }
 
-    var selectedAirport = getQueryVariable('airport');
-    var selectedTimeframe = getQueryVariable('timeframe');
+    // var selectedAirport = getQueryVariable('airport');
+    // var selectedTimeframe = getQueryVariable('timeframe');
 //    debugger;
 
     // Set defaults if no airport or timeframe is selected
     // (i.e. first time the page is open)
-    if (!selectedAirport) {selectedAirport = 'ATL';}
-    if (!selectedTimeframe) {selectedTimeframe = 'annual';}
+    // if (!selectedAirport) {selectedAirport = 'ATL';}
+    // if (!selectedTimeframe) {selectedTimeframe = 'annual';}
 
+    const selectedAirport = d3.select("#airport").node().value;
     console.log("Selected airport is: " + selectedAirport);
 
-    document.getElementById(selectedAirport).selected=true;
-    document.getElementById(selectedTimeframe).selected=true;
+    // document.getElementById(selectedAirport).selected=true;
+    // document.getElementById(selectedTimeframe).selected=true;
 
 
     var svg = dimple.newSvg("#chartContainer", 590, 400);
-    var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
+    // var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
 
     var myChart = new dimple.chart(svg, null);
     myChart.setBounds(60, 45, 510, 315);
@@ -190,13 +196,13 @@
     var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
     myChart.addLegend(200, 10, 380, 20, "right");
 
-    d3.csv(filename, function (data) {
+    // Draw the chart for the first time
+    updateChart();
 
-      AIRLINE_DATA = data;
+    d3.select("#airport").on("change", function() {updateChart()});
+    d3.select("#timeframe").on("change", function() {updateChart()});
 
-      updateChart();
 
-    });
   </script>
 </div>
 <div>
