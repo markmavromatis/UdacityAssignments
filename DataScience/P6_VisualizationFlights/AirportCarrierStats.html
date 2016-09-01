@@ -5,13 +5,14 @@
 
 <body>
 <div>
-<h2>Airline OnTime Performance at US Top10 Airports</h2>
+<h2 id="ChartTitle">Airline OnTime Performance at US Top10 Airports</h2>
 
 </div>
 <!-- <select id="airport" onchange="window.location.href='AirportCarrierStats.html?airport=' + this.value + '&timeframe=' + document.getElementById('timeframe').value" name="airport">
  -->  
 <label>Airport: </label>
-<select id="airport" onChange="window.location.href=buildUrl()" name="airport">
+<!-- <select id="airport" onChange="window.location.href=buildUrl()" name="airport"> -->
+<select id="airport" name="airport">
   <option id="ATL" value="ATL">Atlanta International</option>
   <option id="ORD" value="ORD">Chicago O'Hare</option>
   <option id="DFW" value="DFW">Dallas / Fort Worth</option>
@@ -24,7 +25,8 @@
   <option id="SFO" value="SFO">San Francisco International</option>
 </select><br>
 <label>Timeframe: </label>
-<select id="timeframe" onchange="window.location.href=buildUrl()" name="timeframe">
+<!-- <select id="timeframe" onchange="window.location.href=buildUrl()" name="timeframe"> -->
+<select id="timeframe" name="timeframe">
   <option id="annual" value="annual">Annual</option>
   <option id="jan" value="jan">January</option>
   <option id="feb" value="feb">February</option>
@@ -39,10 +41,14 @@
   <option id="nov" value="nov">November</option>
   <option id="dec" value="dec">December</option>
 </select>
+
+<button onclick='updateChart()'>Click Me</button>
 <div id="chartContainer">
   <script src="lib/d3.v3.4.12.min.js"></script>
   <script src="lib/dimple.v2.1.6.min.js"></script>
   <script type="text/javascript">
+
+    var AIRLINE_DATA = null;
 
     function buildUrl() {
       return `AirportCarrierStats.html?airport=${document.getElementById('airport').value}&timeframe=${document.getElementById('timeframe').value}`
@@ -58,6 +64,33 @@
       return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
     }
 
+    function filterData(selectedAirport, selectedTimeframe) {
+
+    }
+
+
+    // Update the chart using Javascript
+    // Update the chart data and rebuild tooltips
+    function updateChart() {
+      var selectedAirport = document.getElementById('airport').value;
+      var selectedTimeframe = document.getElementById('timeframe').value;
+      console.log("Updating chart with new parameters:");
+      console.log("Selected Airport: " + selectedAirport);
+      console.log("Selected Timeframe: " + selectedTimeframe);
+
+      chartData = AIRLINE_DATA.filter(function(row) {
+        return row['Origin'] === selectedAirport;
+      });
+
+      // debugger;
+      myChart.data = chartData;
+      myChart.series[0].getTooltipText = function(e) {
+        return buildTooltip(e, chartData);
+      };
+      myChart.draw(1000);
+
+    }
+
     function getQueryVariable(variable) {
         var query = window.location.search.substring(1);
         var vars = query.split('&');
@@ -70,50 +103,18 @@
         console.log('Query variable %s not found', variable);
     }
 
-    var selectedAirport = getQueryVariable('airport');
-    var selectedTimeframe = getQueryVariable('timeframe');
-//    debugger;
+    function buildTooltip(e, chartDataSet) {
+      console.log("In buildTooltip method...");
+      console.log("Value of e is: "  + e);
+      var key = e.key;
+      var fields = key.split("_");
+      var recordType = fields[0];
+      var carrier = fields[1];
+      var returnValue = "";
 
-    // Set defaults if no airport or timeframe is selected
-    // (i.e. first time the page is open)
-    if (!selectedAirport) {selectedAirport = 'ATL';}
-    if (!selectedTimeframe) {selectedTimeframe = 'annual';}
-
-    console.log("Selected airport is: " + selectedAirport);
-
-    document.getElementById(selectedAirport).selected=true;
-    document.getElementById(selectedTimeframe).selected=true;
-
-
-    var svg = dimple.newSvg("#chartContainer", 590, 400);
-    var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
-//    debugger;
-    d3.csv(filename, function (data) {
-      data2 = data.filter(function(row) {
-        return row['Origin'] === selectedAirport;
-      })
-      console.log("Data rows = " + data.length);
-      console.log("Filtered rows = " + data2.length);
-      // console.log("Airport argument is: " + get('airport'));
-//      console.log(window.location.search);
-//      debugger;
-      var myChart = new dimple.chart(svg, data2);
-      myChart.setBounds(60, 45, 510, 315);
-      myChart.addCategoryAxis("x", "CarrierName");
-      myChart.addMeasureAxis("y", "Count");
-      var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
-      myChart.addLegend(200, 10, 380, 20, "right");
-      series.getTooltipText = function(e) {
-        var key = e.key;
-        console.log("KEY = " + key);
-        var fields = key.split("_");
-        var recordType = fields[0];
-        var carrier = fields[1];
-        var returnValue = "";
-
-        if (recordType === "OnTime") {
-          returnValue = [`On-Time Flights = ${formatLargeNumber(e.yValue)}`];
-        } else {
+      if (recordType === "OnTime") {
+        returnValue = [`On-Time Flights = ${formatLargeNumber(e.yValue)}`];
+      } else {
           var filtered = data2.filter(function(row) {
             return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
           })
@@ -157,11 +158,44 @@
             `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
             `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
             ];
-        }
+      }
+      console.log("KEY = " + key);
+      console.log("ReturnValue is: " + returnValue);
+      console.log("Leaving buildTooltip method...")
+      return returnValue;
+    }
 
-        return returnValue;
-      };
-      myChart.draw();
+    var selectedAirport = getQueryVariable('airport');
+    var selectedTimeframe = getQueryVariable('timeframe');
+//    debugger;
+
+    // Set defaults if no airport or timeframe is selected
+    // (i.e. first time the page is open)
+    if (!selectedAirport) {selectedAirport = 'ATL';}
+    if (!selectedTimeframe) {selectedTimeframe = 'annual';}
+
+    console.log("Selected airport is: " + selectedAirport);
+
+    document.getElementById(selectedAirport).selected=true;
+    document.getElementById(selectedTimeframe).selected=true;
+
+
+    var svg = dimple.newSvg("#chartContainer", 590, 400);
+    var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
+
+    var myChart = new dimple.chart(svg, null);
+    myChart.setBounds(60, 45, 510, 315);
+    myChart.addCategoryAxis("x", "CarrierName");
+    myChart.addMeasureAxis("y", "Count");
+    var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
+    myChart.addLegend(200, 10, 380, 20, "right");
+
+    d3.csv(filename, function (data) {
+
+      AIRLINE_DATA = data;
+
+      updateChart();
+
     });
   </script>
 </div>
