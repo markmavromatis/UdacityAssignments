@@ -10,13 +10,18 @@
     <h2 id="ChartTitle">Airline OnTime Performance at US Top10 Airports</h2>
   </div>
 
+  <!-- Flight Count or On-Time % -->
+  <label class="InputLabel">Chart Type: </label>
+
+  <input type="radio" id="chartModeFlights" name="chartMode" value="flights" checked>Carrier Size
+  <input type="radio" id="chartModePercent" name="chartMode" value="percent">Carrier On-Time Percent
+  <br>
+
   <!-- Airport Selection Control -->
   <label class="InputLabel">Airport: </label>
 
-<button id="TestButton">Test</button><br>
+  <button id="TestButton">Test</button><br>
 
-<input type="radio" name="chartMode" value="flights">
-<input type="radio" name="chartMode" value="percent">
 
   <select id="airport" name="airport">
     <option id="000" value="000">All Airports</option>
@@ -38,18 +43,18 @@
 
   <select id="timeframe" name="timeframe">
     <option id="annual" value="annual">Annual</option>
-    <option id="jan" value="jan">January</option>
-    <option id="feb" value="feb">February</option>
-    <option id="mar" value="mar">March</option>
-    <option id="apr" value="apr">April</option>
-    <option id="may" value="may">May</option>
-    <option id="jun" value="jun">June</option>
-    <option id="jul" value="jul">July</option>
-    <option id="aug" value="aug">August</option>
-    <option id="sep" value="sep">September</option>
-    <option id="oct" value="oct">October</option>
-    <option id="nov" value="nov">November</option>
-    <option id="dec" value="dec">December</option>
+    <option id="jan" value="month1">January</option>
+    <option id="feb" value="month2">February</option>
+    <option id="mar" value="month3">March</option>
+    <option id="apr" value="month4">April</option>
+    <option id="may" value="month5">May</option>
+    <option id="jun" value="month6">June</option>
+    <option id="jul" value="month7">July</option>
+    <option id="aug" value="month8">August</option>
+    <option id="sep" value="month9">September</option>
+    <option id="oct" value="month10">October</option>
+    <option id="nov" value="month11">November</option>
+    <option id="dec" value="month12">December</option>
   </select>
 <br>
 
@@ -83,77 +88,7 @@
 
 
 
-    // Update the chart using Javascript
-    // Update the chart data and rebuild tooltips
-    function updateChart() {
-      var selectedAirport = document.getElementById('airport').value;
-      var selectedTimeframe = document.getElementById('timeframe').value;
 
-      // Reset zoom control (and associated label) to 100% zoom 
-      var zoomLevelControl = document.getElementById('zoomLevel');
-      zoomLevelControl.value = 100;
-      d3.select("#zoomLevelDisplay").text("100%")
-
-      // Setup associated data file (either annual or 1-month of data)
-      var filename = `data/airport_carrier_stats_${selectedTimeframe}.csv`
-
-      // Load the file and setup the chart data
-      d3.csv(filename, function (data) {
-
-        // Filter data by origin (if airport selected)
-        if (selectedAirport == "000") {
-          // Do not filter any data. We want all airports
-          chartData = data;
-        } else {
-          // Filter out the data for a single airport
-          chartData = data.filter(function(row) {
-            var originAirportMatch = row['Origin'] === selectedAirport;
-            return originAirportMatch;
-          });
-        }
-
-        // Change airline names to their prefix (i.e. 'American Airlines' -> 'American')
-        chartData = chartData.map(function(aRow) {
-          // If the carrier name contains a space, then just keep the prefix
-          // otherwise, display entire airline name
-          const carrierFullName = aRow['CarrierName'];
-          const carrierDisplayName = carrierFullName.indexOf(' ') > -1 ? carrierFullName.split(' ')[0] : carrierFullName;
-          aRow['CarrierName'] = carrierDisplayName;
-          return aRow;
-        })
-
-        // When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
-        // I see error messages in the console.
-        //
-        // This happens when a user transitions from a large airport with many airlines (i.e. LAX) to a smaller airport (i.e. IAH).
-        // 
-        // To get araound this, I remove any existing bar charts and redraw the chart from scratch.
-        if (myChart.series) {
-          myChart.series.forEach(function(series){
-            if (series.shapes) {
-              series.shapes.remove();
-            }
-          });
-          myChart.series.splice(0, 1);
-        }
-        myChart.addSeries(["RecordType"], dimple.plot.bar)
-
-        // Reset the chart data, reset the y-axis zoom, and update the tooltips
-        myChart.data = chartData;
-        myChart.axes[1].overrideMax = null;
-        myChart.series[0].getTooltipText = function(e) {
-          return buildTooltip(e, chartData);
-        };
-        myChart.series[0].tooltipFontSize="12px";
-
-        // Now refresh the chart
-        myChart = myChart.draw(500,false);
-
-        // Update the maximum Y axis value (for zoom calculations)
-        originalYMax = myChart.axes[1]._max;
-      });
-
-    }
 
     // Code for setting the tooltip text
     // This code calculates on-time and delayed percentages in addition to displaying the numbers.
@@ -252,12 +187,10 @@
     var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
     myChart.addLegend(200, 10, 380, 20, "right");
 
-    // Draw the chart for the first time
-    updateChart();
 
-    // For airport and time frame selection controls, update the chart when the value changes
-    d3.select("#airport").on("change", function() {updateChart()});
-    d3.select("#timeframe").on("change", function() {updateChart()});
+    // // For airport and time frame selection controls, update the chart when the value changes
+    // d3.select("#airport").on("change", function() {updateChart()});
+    // d3.select("#timeframe").on("change", function() {updateChart()});
 
     // Zoom updates
     d3.select("#zoomLevel").on("change", function() {
