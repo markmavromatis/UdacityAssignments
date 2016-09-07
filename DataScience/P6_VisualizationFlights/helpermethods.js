@@ -3,9 +3,23 @@ var filename = `data/airport_carrier_stats_annual.csv`
 
 var FLIGHT_DATA_2015 = [];
 var myChart;
+// Create a SVG container for our bar chart
+var svg = dimple.newSvg("#chartContainer", 590, 400);
+
+// For the zoom control, we need to store the Y axis maximum value at 100% zoom.
+var originalYMax = 0;
+
+
+initializePage();
 
 
 function initializePage() {
+
+	// Hide user inputs
+	// document.getElementById('UserInputs').disabled = true;
+
+	// Disable controls while the story is being told...
+	disableControls(true);
 
 	// Load the file and setup the chart data
 	d3.csv(filename, function (data) {
@@ -13,13 +27,6 @@ function initializePage() {
 		console.log("Loaded flight data.");
 		updateChart();
 	})
-
-	// document.getElementById('TestButton').addEventListener("click", function(evt) {
-
-	// 	const filteredData = filterData();
-	// 	var results = prepareOnTimePercentData(filteredData);
-	// 	console.log("Results = " + results);
-	// });
 
 	document.getElementById('chartModeFlights').addEventListener("change", function(evt) {
 		console.log("Clicked Flight Counts mode!");
@@ -35,7 +42,143 @@ function initializePage() {
     d3.select("#airport").on("change", function() {updateChart()});
     d3.select("#timeframe").on("change", function() {updateChart()});
 
+
+
+
+
+    // Zoom updates
+    d3.select("#zoomLevel").on("change", function() {
+
+      const zoomLevelValue = this.value;
+      const newMax = 1.0 * originalYMax / (zoomLevelValue / 100);
+      d3.select("#zoomLevelDisplay").text(zoomLevelValue + "%")
+      myChart.axes[1].overrideMax = newMax;
+      myChart.draw(500);
+    })
+
+    const percentagesRadio = document.getElementById('chartModePercent')
+    console.log("Before");
+    setTimeout(function() {
+    	console.log("After")
+	    console.log("Before2");
+	    setTimeout(function() {
+	    	updateStoryDiv("Hello World");
+	    	percentagesRadio.checked = true;
+	    	updateChart();
+	    	console.log("After2")
+			// Story is finished, re-enable controls
+			disableControls(false);
+	    }, 5000)
+    }, 1000)
+
+
+
+
 }
+
+function updateStoryDiv(message) {
+	document.getElementById("StoryFrame").innerHTML = "<h2>" + message + "</h2>";
+
+}
+
+function disableControls(disableFlag) {
+	console.log("Disposable flag = " + disableFlag);
+	document.getElementById('chartModePercent').disabled = disableFlag;
+	document.getElementById('chartModeFlights').disabled = disableFlag;
+	document.getElementById('airport').disabled = disableFlag;
+	document.getElementById('timeframe').disabled = disableFlag;
+	document.getElementById('zoomLevel').disabled = disableFlag;
+
+}
+
+    // Format (ontime, delayed) percentage values for tooltips
+    function formatPercent(aPercentage) {
+      return (Math.round(aPercentage.toFixed(2) * 100)).toString() + "%"
+    }
+
+    // Format large numbers (flight counts, delayed minutes) for tooltips
+    // Regex expression copied from:
+    // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+    function formatLargeNumber(aNumber) {
+      return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+    }
+
+    // Code for setting the tooltip text
+    // This code calculates on-time and delayed percentages in addition to displaying the numbers.
+    function buildTooltip(e, chartDataSet) {
+      var key = e.key;
+      var fields = key.split("_");
+      var recordType = fields[0];
+      var carrier = fields[1];
+      var returnValue = "";
+
+      if (recordType === "OnTime") {
+        // For ontime data, show the # of on-time flights and on-time percentage
+        var onTimeFlights = e.yValue;
+        var delayedFilter = chartDataSet.filter(function(row) {
+          return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
+        })
+        var delayedFlights = delayedFilter.reduce(function(a, b) {
+          return a + parseFloat(b['Count']);
+        }, 0);
+        const totalFlights = onTimeFlights + delayedFlights;
+        const onTimeFlightsDisplay = formatLargeNumber(onTimeFlights);
+        const onTimePercent = onTimeFlights / totalFlights;
+        const onTimePercentDisplay = formatPercent(onTimePercent);
+        returnValue = [
+            `Airline: ${carrier}`,
+            `  `,
+            `On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`
+        ];
+      } else {
+        // For delayed data, show the # of delayed flights, percentage, and delay reasons
+        var filtered = chartDataSet.filter(function(row) {
+          return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
+        })
+        var ontimeFilter = chartDataSet.filter(function(row) {
+          return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
+        })
+        var ontimeFlights = ontimeFilter.reduce(function(a, b) {
+          return a + parseFloat(b['Count']);
+        }, 0);
+        var delayedFlights = e.yValue;
+        console.log(`Delayed flights = ${delayedFlights}`)
+        console.log(`On-Time flights = ${ontimeFlights}`)
+        var totalFlights = ontimeFlights + delayedFlights;
+        var delayedPercent = delayedFlights / totalFlights; 
+
+        var delayedMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['ArrDelayMins']);
+        }, 0);
+        var carrierDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['CarrierDelayMins']);
+        }, 0);
+        console.log("Delayed mins = " + delayedMins)
+        console.log("Carrier Delay mins = " + carrierDelayMins)
+        var weatherDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['WeatherDelayMins']);
+        }, 0);
+        var nasDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['NasDelayMins']);
+        }, 0);
+        var securityDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['SecurityDelayMins']);
+        }, 0);
+        var lateAircraftDelayMins = filtered.reduce(function(a, b) {
+          return a + parseFloat(b['LateAircraftDelayMins']);
+        }, 0);
+
+        returnValue = [`Airline: ${carrier}`,
+          `Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
+          `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
+          `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
+          `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
+          `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
+          `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
+        ];
+      }
+      return returnValue;
+    }
 
 function updateChart() {
 	const flightCountsSelected = document.getElementById('chartModeFlights').checked;
@@ -48,16 +191,6 @@ function updateChart() {
 		updateFlightPercentsChart(chartData);
 	}
 }
-
-// function sortCarriersBySizeDescending(chartData) {
-
-// 	sortDescendingData = chartData.sort(function(a,b) {return b['TotalFlights'] - a['TotalFlights']})
-// 	returnValues = [];
-// 	for (var i = 0; i < sortDescendingData.length; i++) {
-// 		returnValues.push(sortDescendingData[i]['CarrierName']);
-// 	}
-// 	return returnValues;
-// }
 
 
 function filterData() {
@@ -162,7 +295,7 @@ function prepareOnTimePercentData(flightData) {
 		var zoomLevelControl = document.getElementById('zoomLevel');
      	zoomLevelControl.disabled = false;
       	zoomLevelControl.value = 100;
-	    zoomLevelControl.hidden = true;
+	    zoomLevelControl.hidden = false;
       	d3.select("#zoomLevelDisplay").text("100%")
 
         // When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
@@ -189,6 +322,8 @@ function prepareOnTimePercentData(flightData) {
 	    var flightsAxis = myChart.addMeasureAxis("y", "Count");
 	    flightsAxis.title = "Flights";
 	    flightsAxis.fontSize = "12px";
+	    flightsAxis.overrideMax = null;
+
 
 	    // Series data and chart type
 	    const mySeries = myChart.addSeries(["RecordType"], dimple.plot.bar);
@@ -206,7 +341,7 @@ function prepareOnTimePercentData(flightData) {
         myChart = myChart.draw(500,false);
 
         // Update the maximum Y axis value (for zoom calculations)
-        originalYMax = myChart.axes[1]._max;
+        originalYMax = flightsAxis._max;
       };
 
     
