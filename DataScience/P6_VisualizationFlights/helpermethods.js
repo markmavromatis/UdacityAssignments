@@ -2,6 +2,8 @@
 var filename = `data/airport_carrier_stats_annual.csv`
 
 var FLIGHT_DATA_2015 = [];
+var myChart;
+
 
 function initializePage() {
 
@@ -39,13 +41,10 @@ function updateChart() {
 	const flightCountsSelected = document.getElementById('chartModeFlights').checked;
 	const filteredData = filterData();
 
-
 	if (flightCountsSelected) {
 		updateFlightCountsChart(filteredData);
 	} else {
 		const chartData = prepareOnTimePercentData(filteredData);
-		// const sortedCarriers = sortCarriersBySizeDescending(chartData);
-		// // debugger;
 		updateFlightPercentsChart(chartData);
 	}
 }
@@ -69,7 +68,6 @@ function filterData() {
 		selectedTimeframe = selectedTimeframe.substring(5);
 	}
 
-	// debugger;
 	console.log("# of flight records: " + FLIGHT_DATA_2015.length);
 	console.log("Selected airport = " + selectedAirport);
 	console.log("Selected timeframe = " + selectedTimeframe);
@@ -159,39 +157,27 @@ function prepareOnTimePercentData(flightData) {
     // Update the chart using Javascript
     // Update the chart data and rebuild tooltips
     function updateFlightCountsChart(chartData) {
-      // var selectedAirport = document.getElementById('airport').value;
-      // var selectedTimeframe = document.getElementById('timeframe').value;
 
-      // Reset zoom control (and associated label) to 100% zoom 
-      var zoomLevelControl = document.getElementById('zoomLevel');
-      zoomLevelControl.disabled = false;
-      zoomLevelControl.value = 100;
-      d3.select("#zoomLevelDisplay").text("100%")
-
+		// Reset zoom control (and associated label) to 100% zoom 
+		var zoomLevelControl = document.getElementById('zoomLevel');
+     	zoomLevelControl.disabled = false;
+      	zoomLevelControl.value = 100;
+	    zoomLevelControl.hidden = true;
+      	d3.select("#zoomLevelDisplay").text("100%")
 
         // When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
         // I see error messages in the console.
         //
         // This happens when a user transitions from a large airport with many airlines (i.e. LAX) to a smaller airport (i.e. IAH).
         // 
-        // To get araound this, I remove any existing bar charts and redraw the chart from scratch.
-        if (myChart.series) {
-          myChart.series.forEach(function(series){
-            if (series.shapes) {
-              series.shapes.remove();
-            }
-          });
-          myChart.series.splice(0, 1);
-        }
-	    if (myChart.axes) {
-	      myChart.axes.forEach(function(axis){
-	        if (axis.shapes) {
-	          axis.shapes.remove();
-	        }
-	      });
-	      myChart.axes.splice(0, 2);
-	    }
+        // To get around this, draw graph again from scratch.
+        if (myChart) {
+			myChart.svg.selectAll('*').remove();
 
+		}
+	    myChart = new dimple.chart(svg, null);
+	    myChart.setBounds(60, 45, 510, 250);
+	    myChart.addLegend(200, 10, 380, 20, "right");
 
 
 	    // X axis
@@ -225,69 +211,48 @@ function prepareOnTimePercentData(flightData) {
 
     
 
-        // Update the chart using Javascript
-    // Update the chart data and rebuild tooltips
+
     function updateFlightPercentsChart(chartData) {
 
-      // Reset zoom control (and associated label) to 100% zoom 
-      var zoomLevelControl = document.getElementById('zoomLevel');
-      zoomLevelControl.disabled = true;
+		// Reset zoom control (and associated label) to 100% zoom 
+		var zoomLevelControl = document.getElementById('zoomLevel');
+		zoomLevelControl.hidden = true;
 
-      // zoomLevelControl.value = 100;
-      d3.select("#zoomLevelDisplay").text("100%")
+		// zoomLevelControl.value = 100;
+		d3.select("#zoomLevelDisplay").text("100%")
 
-    // When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
-    // I see error messages in the console.
-    //
-    // This happens when a user transitions from a large airport with many airlines (i.e. LAX) to a smaller airport (i.e. IAH).
-    // 
-    // To get this, I remove any existing bar charts and redraw the chart from scratch.
-    if (myChart.series) {
-      myChart.series.forEach(function(series){
-        if (series.shapes) {
-          series.shapes.remove();
-        }
-      });
-      myChart.series.splice(0, 1);
-    }
-    if (myChart.axes) {
-      myChart.axes.forEach(function(axis){
-        if (axis.shapes) {
-          axis.shapes.remove();
-        }
-      });
-      myChart.axes.splice(0, 2);
-    }
+		if (myChart) {
+			myChart.svg.selectAll('*').remove();
+		}
 
-
+	    myChart = new dimple.chart(svg, null);
+	    myChart.setBounds(60, 45, 510, 250);
 
         // Reset the chart data, reset the y-axis zoom, and update the tooltips
         myChart.data = chartData;
 
-    // X axis
-    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
-    carrierAxis.title = "Airlines";
-    carrierAxis.fontSize = "12px";
-    carrierAxis.addOrderRule("TotalFlights", true);
+	    // X axis
+	    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
+	    carrierAxis.title = "Airlines";
+	    carrierAxis.fontSize = "12px";
+	    carrierAxis.addOrderRule("TotalFlights", true);
 
-    // Y Axis
-    var flightsAxis = myChart.addMeasureAxis("y", "OnTimePercent");
-    flightsAxis.title = "On-Time Percent";
-    flightsAxis.fontSize = "12px";
+	    // Y Axis
+	    var flightsAxis = myChart.addMeasureAxis("y", "OnTimePercent");
+	    flightsAxis.title = "On-Time Percent";
+	    flightsAxis.fontSize = "12px";
+	    flightsAxis.overrideMax = 100;
 
 
-    myChart.addSeries(null, dimple.plot.bar)
+	    myChart.addSeries(null, dimple.plot.bar)
 
-    // myChart.series[0].getTooltipText = function(e) {
-    //   return buildTooltip(e, chartData);
-    // };
-    myChart.series[0].tooltipFontSize="12px";
+	    myChart.series[0].tooltipFontSize="12px";
 
-    // Now refresh the chart
-    myChart.draw(500,false);
+	    // Now refresh the chart
+	    myChart.draw(500,false);
 
-    // Update the maximum Y axis value (for zoom calculations)
-    originalYMax = myChart.axes[1]._max;
+	    // Update the maximum Y axis value (for zoom calculations)
+	    originalYMax = myChart.axes[1]._max;
 
     }
 

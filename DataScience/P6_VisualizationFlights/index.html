@@ -170,22 +170,22 @@
     // Create a SVG container for our bar chart
     var svg = dimple.newSvg("#chartContainer", 590, 400);
 
-    var myChart = new dimple.chart(svg, null);
-    myChart.setBounds(60, 45, 510, 250);
+    // var myChart = new dimple.chart(svg, null);
+    // myChart.setBounds(60, 45, 510, 250);
 
-    // X axis
-    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
-    carrierAxis.title = "Airlines";
-    carrierAxis.fontSize = "12px";
+    // // X axis
+    // var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
+    // carrierAxis.title = "Airlines";
+    // carrierAxis.fontSize = "12px";
 
-    // Y Axis
-    var flightsAxis = myChart.addMeasureAxis("y", "Count");
-    flightsAxis.title = "Flights";
-    flightsAxis.fontSize = "12px";
+    // // Y Axis
+    // var flightsAxis = myChart.addMeasureAxis("y", "Count");
+    // flightsAxis.title = "Flights";
+    // flightsAxis.fontSize = "12px";
 
     // Series data and chart type
-    var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
-    myChart.addLegend(200, 10, 380, 20, "right");
+    // var series = myChart.addSeries(["RecordType"], dimple.plot.bar);
+    // myChart.addLegend(200, 10, 380, 20, "right");
 
 
     // // For airport and time frame selection controls, update the chart when the value changes
