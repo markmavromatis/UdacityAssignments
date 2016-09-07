@@ -13,6 +13,11 @@
   <!-- Airport Selection Control -->
   <label class="InputLabel">Airport: </label>
 
+<button id="TestButton">Test</button><br>
+
+<input type="radio" name="chartMode" value="flights">
+<input type="radio" name="chartMode" value="percent">
+
   <select id="airport" name="airport">
     <option id="000" value="000">All Airports</option>
     <option id="ATL" value="ATL">Atlanta International</option>
@@ -56,7 +61,10 @@
 <div id="chartContainer">
   <script src="lib/d3.v3.4.8.js" charset="utf-8"></script>
   <script src="lib/dimple.v2.2.0.js"></script>
+  <script src="helpermethods.js"></script>
   <script type="text/javascript">
+
+    initializePage()
 
     // For the zoom control, we need to store the Y axis maximum value at 100% zoom.
     var originalYMax = 0;
