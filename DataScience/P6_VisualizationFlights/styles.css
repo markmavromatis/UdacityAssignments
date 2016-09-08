@@ -1,0 +1,13 @@
+div.story-visible {
+	background-color: lightblue;
+	height: 10em; // 4 lines
+}
+
+div.story-invisible {
+	background-color: lightblue;
+	height: 0em; // 4 lines
+}
+
+div.disabled {
+	background-color: lightgrey;
+}

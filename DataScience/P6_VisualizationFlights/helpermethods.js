@@ -9,14 +9,16 @@ var svg = dimple.newSvg("#chartContainer", 590, 400);
 // For the zoom control, we need to store the Y axis maximum value at 100% zoom.
 var originalYMax = 0;
 
+var narrativeHiddenStatus = false;
+var narrativePage = 1;
+
+var narrativeScript = [];
+
 
 initializePage();
 
 
 function initializePage() {
-
-	// Hide user inputs
-	// document.getElementById('UserInputs').disabled = true;
 
 	// Disable controls while the story is being told...
 	disableControls(true);
@@ -26,6 +28,14 @@ function initializePage() {
   		FLIGHT_DATA_2015 = data;
 		console.log("Loaded flight data.");
 		updateChart();
+
+		// Now load narrative text from the data file
+		var request = new XMLHttpRequest();
+   		request.open("GET", "data/narrative.json", false);
+   		request.send(null)
+   		narrativeScript = JSON.parse(request.responseText);
+	  	renderNarrative(1);
+
 	})
 
 	document.getElementById('chartModeFlights').addEventListener("change", function(evt) {
@@ -33,10 +43,10 @@ function initializePage() {
 		updateChart();
 	})
 
-	document.getElementById('chartModePercent').addEventListener("click", function(evt) {
+	document.getElementById('chartModePercent').addEventListener("change", function(evt) {
 		console.log("Clicked Flight Percent mode!");
 		updateChart();
-	})
+	});
 
     // For airport and time frame selection controls, update the chart when the value changes
     d3.select("#airport").on("change", function() {updateChart()});
@@ -57,22 +67,48 @@ function initializePage() {
     })
 
     const percentagesRadio = document.getElementById('chartModePercent')
-    console.log("Before");
-    setTimeout(function() {
-    	console.log("After")
-	    console.log("Before2");
-	    setTimeout(function() {
-	    	updateStoryDiv("Hello World");
-	    	percentagesRadio.checked = true;
-	    	updateChart();
-	    	console.log("After2")
-			// Story is finished, re-enable controls
-			disableControls(false);
-	    }, 5000)
-    }, 1000)
 
+}
 
+function renderNarrative(pageNumber) {
+	// If page number passed here, then update narrativePage global variable
+	if (pageNumber) {
+		narrativePage = pageNumber;
+	} else {
+		// No page specified. Default to narrativePage global variable.
+		pageNumber = narrativePage;
+	}
 
+	const storyDiv = document.getElementById('NarrativeText');
+	const buttonsDiv = document.getElementById('NarrativeButtons');
+
+	if (!narrativeHiddenStatus) {
+		storyDiv.className = "story-visible";
+		const scriptDetails = narrativeScript[pageNumber - 1];
+		storyDiv.innerHTML = `<h2>${scriptDetails['title']}</h2><p>${scriptDetails['text']}</p>`;
+		storyDiv.innerHTML += `Page ${pageNumber}/${narrativeScript.length}<br>`;
+		buttonsDiv.innerHTML = "";
+		// if (pageNumber > 1) {
+		const disabledPrevious = (pageNumber === 1) ? "disabled" : "";
+		buttonsDiv.innerHTML += `<button id="NarrativePreviousPage" onClick="renderNarrative(${pageNumber - 1});return false;" ${disabledPrevious}>Previous</button>&nbsp;`;
+		const disabledNext = (pageNumber === narrativeScript.length) ? "disabled" : "";
+		buttonsDiv.innerHTML += `<button id="NarrativeNextPage" onClick="renderNarrative(${pageNumber + 1});return false;" ${disabledNext}>Next</button>`;
+		buttonsDiv.innerHTML += `<button id="HideNarrative" onclick="narrativeHiddenStatus = true;renderNarrative(${pageNumber});return false;">Hide Narrative</a>`;
+	    d3.select("#airport").property("value", scriptDetails['airport']);
+	    d3.select("#timeframe").property("value", scriptDetails['timeframe']);
+	    const chartMode = scriptDetails['chartmode'];
+	    d3.select("#chartModeFlights").property("checked", chartMode === 'size');
+	    d3.select("#chartModePercent").property("checked", chartMode === 'percent');
+		storyDiv.className = "story-visible";
+	    updateChart();
+		disableControls(true);
+	} else {
+		storyDiv.innerHTML = "";
+		storyDiv.className = "story-invisible";
+		buttonsDiv.innerHTML = `<button id="ShowNarrative" onclick="narrativeHiddenStatus = false;renderNarrative(${pageNumber});return false;">Show Narrative</a>`;
+		disableControls(false);
+
+	}
 
 }
 
@@ -82,13 +118,19 @@ function updateStoryDiv(message) {
 }
 
 function disableControls(disableFlag) {
-	console.log("Disposable flag = " + disableFlag);
+	// console.log("Disposable flag = " + disableFlag);
 	document.getElementById('chartModePercent').disabled = disableFlag;
 	document.getElementById('chartModeFlights').disabled = disableFlag;
 	document.getElementById('airport').disabled = disableFlag;
 	document.getElementById('timeframe').disabled = disableFlag;
 	document.getElementById('zoomLevel').disabled = disableFlag;
 
+	const userInputsDiv = document.getElementById('UserInputs');
+	if (disableFlag) {
+		userInputsDiv.className = "disabled";
+	} else {
+		userInputsDiv.classList.remove("disabled");
+	}
 }
 
     // Format (ontime, delayed) percentage values for tooltips
@@ -142,8 +184,8 @@ function disableControls(disableFlag) {
           return a + parseFloat(b['Count']);
         }, 0);
         var delayedFlights = e.yValue;
-        console.log(`Delayed flights = ${delayedFlights}`)
-        console.log(`On-Time flights = ${ontimeFlights}`)
+        // console.log(`Delayed flights = ${delayedFlights}`)
+        // console.log(`On-Time flights = ${ontimeFlights}`)
         var totalFlights = ontimeFlights + delayedFlights;
         var delayedPercent = delayedFlights / totalFlights; 
 
@@ -153,8 +195,8 @@ function disableControls(disableFlag) {
         var carrierDelayMins = filtered.reduce(function(a, b) {
           return a + parseFloat(b['CarrierDelayMins']);
         }, 0);
-        console.log("Delayed mins = " + delayedMins)
-        console.log("Carrier Delay mins = " + carrierDelayMins)
+        // console.log("Delayed mins = " + delayedMins)
+        // console.log("Carrier Delay mins = " + carrierDelayMins)
         var weatherDelayMins = filtered.reduce(function(a, b) {
           return a + parseFloat(b['WeatherDelayMins']);
         }, 0);
@@ -201,14 +243,13 @@ function filterData() {
 		selectedTimeframe = selectedTimeframe.substring(5);
 	}
 
-	console.log("# of flight records: " + FLIGHT_DATA_2015.length);
-	console.log("Selected airport = " + selectedAirport);
-	console.log("Selected timeframe = " + selectedTimeframe);
+	// console.log("# of flight records: " + FLIGHT_DATA_2015.length);
+	// console.log("Selected airport = " + selectedAirport);
+	// console.log("Selected timeframe = " + selectedTimeframe);
 
 	const filteredData = FLIGHT_DATA_2015.filter(function(row) {
 		const airportMatch = selectedAirport === "000" || selectedAirport === row['Origin'];
 		const timeframeMatch = selectedTimeframe === "annual" || selectedTimeframe === row['Month'];
-		console.log("Row month substring = " + selectedTimeframe);
 		return airportMatch && timeframeMatch;
 	})
 
@@ -222,7 +263,6 @@ function filterData() {
     })
 
 
-	console.log("Filtered row count: " + filteredData.length);
 	return filteredData;
 }
 
@@ -231,15 +271,15 @@ function prepareOnTimePercentData(flightData) {
 	// Array will hold airlines and flight data
 	// Lookup object will hold airline -> row mapping
 
-	console.log("Entering method prepareOnTimePercentData...");
-	console.log("# rows = " + flightData.length);
+	// console.log("Entering method prepareOnTimePercentData...");
+	// console.log("# rows = " + flightData.length);
 	var carrierData = [];
 	var carrierLookup = {};
 
 	for (var i = 0; i < flightData.length; i++) {
 		const row = flightData[i];
 		const carrierName = row['CarrierName'];
-		console.log("Carrier = " + carrierName);
+		// console.log("Carrier = " + carrierName);
 		var statRow = {}
 
 		if (carrierLookup[carrierName]) {
