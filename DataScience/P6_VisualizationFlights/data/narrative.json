@@ -1,7 +1,7 @@
 [
 {
 	"title" : "Large Airlines and Performance",
-	"text" : "America's major airlines are larger than ever. So are it's airports.<br> How do the largest airlines compare against their peers for on-time performance? Do large airlines have the best on-time statistics?",
+	"text" : "America's major airlines are larger than ever! Large airports keep getting larger as well!<br> How do the largest airlines compare against their peers for on-time performance? Do large airlines have the best on-time statistics?<br>&nbsp;<br>Click 'Next' to read more or 'Hide Narrative' to query airports, airlines, and on-time performance yourself!",
 	"airport" : "000",
 	"timeframe" : "annual",
 	"chartmode" : "size"},
@@ -40,10 +40,19 @@
 	"timeframe" : "annual",
 	"chartmode" : "percent"
 },
-{"title" : "Spirit perhaps the worst",
-"text" : "Spirit Airlines is a low-cost carrier infamous for its lack of frills and customer service. It performs quite poorly in on-time performance compared to other airlines. In June, its on-time percentage at Chicago O'Hare airport was less than 40%!",
-"airport" : "ORD",
-"timeframe" : "month6",
-"chartmode" : "percent"
+{
+	"title" : "Spirit Airlines has poor on-time statistics",
+	"text" : "Spirit Airlines is a low-cost carrier infamous for its lack of frills and customer service. It performs quite poorly in on-time performance compared to other airlines. In June, its on-time percentage at Chicago O'Hare airport was less than 40%!",
+	"airport" : "ORD",
+	"timeframe" : "month6",
+	"chartmode" : "percent"
+},
+{
+	"title" : "Free Time",
+	"text" : "Which carriers serve your favorite airport?<br>How do they perform against others?<br>Click 'Hide Narrative' to continue exploring airports and airline statistics. Some observations are noted below. Next time you fly, compare airlines and airports before booking that ticket to reduce your risk of missing that connecting flight!",
+	"airport" : "000",
+	"timeframe" : "annual",
+	"chartmode" : "size"
 }
+
 ]

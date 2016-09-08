@@ -11,3 +11,13 @@ div.story-invisible {
 div.disabled {
 	background-color: lightgrey;
 }
+
+
+button {
+	font-size: 100%;
+}
+
+button:hover:enabled {
+	background-color: #cfd8dc;
+}
+

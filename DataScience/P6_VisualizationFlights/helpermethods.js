@@ -23,7 +23,7 @@ function initializePage() {
 	// Disable controls while the story is being told...
 	disableControls(true);
 
-	// Load the file and setup the chart data
+	// Load the flight data file and setup the chart data
 	d3.csv(filename, function (data) {
   		FLIGHT_DATA_2015 = data;
 		console.log("Loaded flight data.");
@@ -33,6 +33,7 @@ function initializePage() {
 		var xmlhttp = new XMLHttpRequest();
 		var url = "./data/narrative.json";
 
+		// Load narrative text from an external JSON file
 		xmlhttp.onreadystatechange = function() {
 			// console.log("ReadyState = " + this.readyState);
 			// console.log("Status = " + this.status);
@@ -92,13 +93,13 @@ function renderNarrative(pageNumber) {
 	const storyDiv = document.getElementById('NarrativeText');
 	const buttonsDiv = document.getElementById('NarrativeButtons');
 
+	// Render the narrative text inside our narrative div section.
 	if (!narrativeHiddenStatus) {
-		storyDiv.className = "story-visible";
 		const scriptDetails = narrativeScript[pageNumber - 1];
 		storyDiv.innerHTML = `<h2>${scriptDetails['title']}</h2><p>${scriptDetails['text']}</p>`;
 		storyDiv.innerHTML += `Page ${pageNumber}/${narrativeScript.length}<br>`;
 		buttonsDiv.innerHTML = "";
-		// if (pageNumber > 1) {
+
 		buttonsDiv.innerHTML += `<button id="HideNarrative" onclick="narrativeHiddenStatus = true;renderNarrative(${pageNumber});return false;">Hide Narrative</a>`;
 		const disabledPrevious = (pageNumber === 1) ? "disabled" : "";
 		buttonsDiv.innerHTML += `<button id="NarrativePreviousPage" onClick="renderNarrative(${pageNumber - 1});return false;" ${disabledPrevious}>Previous</button>&nbsp;`;
@@ -110,23 +111,23 @@ function renderNarrative(pageNumber) {
 	    d3.select("#chartModeFlights").property("checked", chartMode === 'size');
 	    d3.select("#chartModePercent").property("checked", chartMode === 'percent');
 		storyDiv.className = "story-visible";
+		d3.select("#NarrativeText").transition().duration(250).style("opacity", 100).transition().style("display", "block");
 	    updateChart();
 		disableControls(true);
 	} else {
-		storyDiv.innerHTML = "";
-		storyDiv.className = "story-invisible";
+		// Animate the narrative text being hidden. When the narrative is hidden, render a "Show Narrative" button 
+		// so that a reader can go back to the narrative.
+		d3.select("#NarrativeText").transition().duration(250).style("opacity", 0).transition().style("display", "none");
 		buttonsDiv.innerHTML = `<button id="ShowNarrative" onclick="narrativeHiddenStatus = false;renderNarrative(${pageNumber});return false;">Show Narrative</a>`;
 		disableControls(false);
-
 	}
 
 }
 
-function updateStoryDiv(message) {
-	document.getElementById("StoryFrame").innerHTML = "<h2>" + message + "</h2>";
 
-}
-
+// Toggle access to the chart controls
+// Prevent users from changing the input controls when the narrative is displayed.
+// Narrative text should always match the displayed chart.
 function disableControls(disableFlag) {
 	// console.log("Disposable flag = " + disableFlag);
 	document.getElementById('chartModePercent').disabled = disableFlag;
@@ -143,95 +144,96 @@ function disableControls(disableFlag) {
 	}
 }
 
-    // Format (ontime, delayed) percentage values for tooltips
-    function formatPercent(aPercentage) {
-      return (Math.round(aPercentage.toFixed(2) * 100)).toString() + "%"
-    }
+// Format (ontime, delayed) percentage values for tooltips
+function formatPercent(aPercentage) {
+  return (Math.round(aPercentage.toFixed(2) * 100)).toString() + "%"
+}
 
-    // Format large numbers (flight counts, delayed minutes) for tooltips
-    // Regex expression copied from:
-    // http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
-    function formatLargeNumber(aNumber) {
-      return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
-    }
+// Format large numbers (flight counts, delayed minutes) for tooltips
+// Regex expression copied from:
+// http://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript
+function formatLargeNumber(aNumber) {
+  return aNumber.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
+}
 
-    // Code for setting the tooltip text
-    // This code calculates on-time and delayed percentages in addition to displaying the numbers.
-    function buildTooltip(e, chartDataSet) {
-      var key = e.key;
-      var fields = key.split("_");
-      var recordType = fields[0];
-      var carrier = fields[1];
-      var returnValue = "";
+// Code for setting the tooltip text on flight counts chart.
+// This code calculates on-time and delayed percentages in addition to displaying the numbers.
+function buildTooltip(e, chartDataSet) {
+  var key = e.key;
+  var fields = key.split("_");
+  var recordType = fields[0];
+  var carrier = fields[1];
+  var returnValue = "";
 
-      if (recordType === "OnTime") {
-        // For ontime data, show the # of on-time flights and on-time percentage
-        var onTimeFlights = e.yValue;
-        var delayedFilter = chartDataSet.filter(function(row) {
-          return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
-        })
-        var delayedFlights = delayedFilter.reduce(function(a, b) {
-          return a + parseFloat(b['Count']);
-        }, 0);
-        const totalFlights = onTimeFlights + delayedFlights;
-        const onTimeFlightsDisplay = formatLargeNumber(onTimeFlights);
-        const onTimePercent = onTimeFlights / totalFlights;
-        const onTimePercentDisplay = formatPercent(onTimePercent);
-        returnValue = [
-            `Airline: ${carrier}`,
-            `  `,
-            `On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`
-        ];
-      } else {
-        // For delayed data, show the # of delayed flights, percentage, and delay reasons
-        var filtered = chartDataSet.filter(function(row) {
-          return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
-        })
-        var ontimeFilter = chartDataSet.filter(function(row) {
-          return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
-        })
-        var ontimeFlights = ontimeFilter.reduce(function(a, b) {
-          return a + parseFloat(b['Count']);
-        }, 0);
-        var delayedFlights = e.yValue;
-        // console.log(`Delayed flights = ${delayedFlights}`)
-        // console.log(`On-Time flights = ${ontimeFlights}`)
-        var totalFlights = ontimeFlights + delayedFlights;
-        var delayedPercent = delayedFlights / totalFlights; 
+  if (recordType === "OnTime") {
+    // For ontime data, show the # of on-time flights and on-time percentage
+    var onTimeFlights = e.yValue;
+    var delayedFilter = chartDataSet.filter(function(row) {
+      return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
+    })
+    var delayedFlights = delayedFilter.reduce(function(a, b) {
+      return a + parseFloat(b['Count']);
+    }, 0);
+    const totalFlights = onTimeFlights + delayedFlights;
+    const onTimeFlightsDisplay = formatLargeNumber(onTimeFlights);
+    const onTimePercent = onTimeFlights / totalFlights;
+    const onTimePercentDisplay = formatPercent(onTimePercent);
+    returnValue = [
+        `Airline: ${carrier}`,
+        `  `,
+        `On-Time Flights = ${onTimeFlightsDisplay} (${onTimePercentDisplay})`
+    ];
+  } else {
+    // For delayed data, show the # of delayed flights, percentage, and delay reasons
+    var filtered = chartDataSet.filter(function(row) {
+      return row['RecordType'] === 'Delayed' && row['CarrierName'] === carrier;
+    })
+    var ontimeFilter = chartDataSet.filter(function(row) {
+      return row['RecordType'] === 'OnTime' && row['CarrierName'] === carrier;
+    })
+    var ontimeFlights = ontimeFilter.reduce(function(a, b) {
+      return a + parseFloat(b['Count']);
+    }, 0);
+    var delayedFlights = e.yValue;
+    // console.log(`Delayed flights = ${delayedFlights}`)
+    // console.log(`On-Time flights = ${ontimeFlights}`)
+    var totalFlights = ontimeFlights + delayedFlights;
+    var delayedPercent = delayedFlights / totalFlights; 
 
-        var delayedMins = filtered.reduce(function(a, b) {
-          return a + parseFloat(b['ArrDelayMins']);
-        }, 0);
-        var carrierDelayMins = filtered.reduce(function(a, b) {
-          return a + parseFloat(b['CarrierDelayMins']);
-        }, 0);
-        // console.log("Delayed mins = " + delayedMins)
-        // console.log("Carrier Delay mins = " + carrierDelayMins)
-        var weatherDelayMins = filtered.reduce(function(a, b) {
-          return a + parseFloat(b['WeatherDelayMins']);
-        }, 0);
-        var nasDelayMins = filtered.reduce(function(a, b) {
-          return a + parseFloat(b['NasDelayMins']);
-        }, 0);
-        var securityDelayMins = filtered.reduce(function(a, b) {
-          return a + parseFloat(b['SecurityDelayMins']);
-        }, 0);
-        var lateAircraftDelayMins = filtered.reduce(function(a, b) {
-          return a + parseFloat(b['LateAircraftDelayMins']);
-        }, 0);
+    var delayedMins = filtered.reduce(function(a, b) {
+      return a + parseFloat(b['ArrDelayMins']);
+    }, 0);
+    var carrierDelayMins = filtered.reduce(function(a, b) {
+      return a + parseFloat(b['CarrierDelayMins']);
+    }, 0);
+    // console.log("Delayed mins = " + delayedMins)
+    // console.log("Carrier Delay mins = " + carrierDelayMins)
+    var weatherDelayMins = filtered.reduce(function(a, b) {
+      return a + parseFloat(b['WeatherDelayMins']);
+    }, 0);
+    var nasDelayMins = filtered.reduce(function(a, b) {
+      return a + parseFloat(b['NasDelayMins']);
+    }, 0);
+    var securityDelayMins = filtered.reduce(function(a, b) {
+      return a + parseFloat(b['SecurityDelayMins']);
+    }, 0);
+    var lateAircraftDelayMins = filtered.reduce(function(a, b) {
+      return a + parseFloat(b['LateAircraftDelayMins']);
+    }, 0);
 
-        returnValue = [`Airline: ${carrier}`,
-          `Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
-          `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
-          `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
-          `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
-          `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
-          `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
-        ];
-      }
-      return returnValue;
-    }
+    returnValue = [`Airline: ${carrier}`,
+      `Delayed Flights = ${formatLargeNumber(e.yValue)} (${formatPercent(delayedPercent)})`,
+      `Carrier Delay = ${formatPercent(carrierDelayMins / delayedMins)}`,
+      `Weather Delay = ${formatPercent(weatherDelayMins / delayedMins)}`,
+      `NAS Delay = ${formatPercent(nasDelayMins / delayedMins)}`,
+      `Security Delay = ${formatPercent(securityDelayMins / delayedMins)}`,
+      `Late Aircraft Delay = ${formatPercent(lateAircraftDelayMins / delayedMins)}`
+    ];
+  }
+  return returnValue;
+}
 
+// Re-render the chart after a user control is changed  (or chart type changed)
 function updateChart() {
 	const flightCountsSelected = document.getElementById('chartModeFlights').checked;
 	const filteredData = filterData();
@@ -245,6 +247,7 @@ function updateChart() {
 }
 
 
+// Filter annual 2015 flight data for the selected airport / timeframe
 function filterData() {
 
 	var selectedAirport = document.getElementById('airport').value;
@@ -272,6 +275,8 @@ function filterData() {
 	return filteredData;
 }
 
+// Aggregate filtered flight data to show ontime percent
+// (Data needs to be aggregated to display in a simple bar chart)
 function prepareOnTimePercentData(flightData) {
 
 	// Array will hold airlines and flight data
@@ -331,107 +336,107 @@ function prepareOnTimePercentData(flightData) {
 	return results;
 }
 
-    // Update the chart using Javascript
-    // Update the chart data and rebuild tooltips
-    function updateFlightCountsChart(chartData) {
+// Update the chart using Javascript
+// Update the chart data and rebuild tooltips
+function updateFlightCountsChart(chartData) {
 
-		// Reset zoom control (and associated label) to 100% zoom 
-		var zoomLevelControl = document.getElementById('zoomLevel');
-     	zoomLevelControl.disabled = false;
-      	zoomLevelControl.value = 100;
-	    zoomLevelControl.hidden = false;
-      	d3.select("#zoomLevelDisplay").text("100%")
+	// Reset zoom control (and associated label) to 100% zoom 
+	var zoomLevelControl = document.getElementById('zoomLevel');
+	zoomLevelControl.disabled = false;
+	zoomLevelControl.value = 100;
+	zoomLevelControl.hidden = false;
+	d3.select("#zoomLevelDisplay").text("100%")
 
-        // When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
-        // I see error messages in the console.
-        //
-        // This happens when a user transitions from a large airport with many airlines (i.e. LAX) to a smaller airport (i.e. IAH).
-        // 
-        // To get around this, draw graph again from scratch.
-        if (myChart) {
-			myChart.svg.selectAll('*').remove();
+	// When DimpleJS redraws a bar chart with new data, if there are missing values for existing categories,
+	// I see error messages in the console.
+	//
+	// This happens when a user transitions from a large airport with many airlines (i.e. LAX) to a smaller airport (i.e. IAH).
+	// 
+	// To get around this, draw graph again from scratch.
+	if (myChart) {
+		myChart.svg.selectAll('*').remove();
 
-		}
-	    myChart = new dimple.chart(svg, null);
-	    myChart.setBounds(60, 45, 510, 250);
-	    myChart.addLegend(200, 10, 380, 20, "right");
-
-
-	    // X axis
-	    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
-	    carrierAxis.title = "Airlines";
-	    carrierAxis.fontSize = "12px";
-
-	    // Y Axis
-	    var flightsAxis = myChart.addMeasureAxis("y", "Count");
-	    flightsAxis.title = "Flights";
-	    flightsAxis.fontSize = "12px";
-	    flightsAxis.overrideMax = null;
+	}
+	myChart = new dimple.chart(svg, null);
+	myChart.setBounds(60, 45, 510, 250);
+	myChart.addLegend(200, 10, 380, 20, "right");
 
 
-	    // Series data and chart type
-	    const mySeries = myChart.addSeries(["RecordType"], dimple.plot.bar);
+	// X axis
+	var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
+	carrierAxis.title = "Airlines";
+	carrierAxis.fontSize = "12px";
 
-        // Reset the chart data, reset the y-axis zoom, and update the tooltips
-        myChart.data = chartData;
+	// Y Axis
+	var flightsAxis = myChart.addMeasureAxis("y", "Count");
+	flightsAxis.title = "Flights";
+	flightsAxis.fontSize = "12px";
+	flightsAxis.overrideMax = null;
 
-        myChart.axes[1].overrideMax = null;
-        mySeries.getTooltipText = function(e) {
-          return buildTooltip(e, chartData);
-        };
-        mySeries.tooltipFontSize="12px";
 
-        // Now refresh the chart
-        myChart = myChart.draw(500,false);
+	// Series data and chart type
+	const mySeries = myChart.addSeries(["RecordType"], dimple.plot.bar);
 
-        // Update the maximum Y axis value (for zoom calculations)
-        originalYMax = flightsAxis._max;
-      };
+	// Reset the chart data, reset the y-axis zoom, and update the tooltips
+	myChart.data = chartData;
+
+	myChart.axes[1].overrideMax = null;
+	mySeries.getTooltipText = function(e) {
+	  return buildTooltip(e, chartData);
+	};
+	mySeries.tooltipFontSize="12px";
+
+	// Now refresh the chart
+	myChart = myChart.draw(500,false);
+
+	// Update the maximum Y axis value (for zoom calculations)
+	originalYMax = flightsAxis._max;
+};
 
     
 
 
-    function updateFlightPercentsChart(chartData) {
+function updateFlightPercentsChart(chartData) {
 
-		// Reset zoom control (and associated label) to 100% zoom 
-		var zoomLevelControl = document.getElementById('zoomLevel');
-		zoomLevelControl.hidden = true;
+	// Reset zoom control (and associated label) to 100% zoom 
+	var zoomLevelControl = document.getElementById('zoomLevel');
+	zoomLevelControl.hidden = true;
 
-		// zoomLevelControl.value = 100;
-		d3.select("#zoomLevelDisplay").text("100%")
+	// zoomLevelControl.value = 100;
+	d3.select("#zoomLevelDisplay").text("100%")
 
-		if (myChart) {
-			myChart.svg.selectAll('*').remove();
-		}
+	if (myChart) {
+		myChart.svg.selectAll('*').remove();
+	}
 
-	    myChart = new dimple.chart(svg, null);
-	    myChart.setBounds(60, 45, 510, 250);
+    myChart = new dimple.chart(svg, null);
+    myChart.setBounds(60, 45, 510, 250);
 
-        // Reset the chart data, reset the y-axis zoom, and update the tooltips
-        myChart.data = chartData;
+    // Reset the chart data, reset the y-axis zoom, and update the tooltips
+    myChart.data = chartData;
 
-	    // X axis
-	    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
-	    carrierAxis.title = "Airlines";
-	    carrierAxis.fontSize = "12px";
-	    carrierAxis.addOrderRule("TotalFlights", true);
+    // X axis
+    var carrierAxis = myChart.addCategoryAxis("x", "CarrierName");
+    carrierAxis.title = "Airlines";
+    carrierAxis.fontSize = "12px";
+    carrierAxis.addOrderRule("TotalFlights", true);
 
-	    // Y Axis
-	    var flightsAxis = myChart.addMeasureAxis("y", "OnTimePercent");
-	    flightsAxis.title = "On-Time Percent";
-	    flightsAxis.fontSize = "12px";
-	    flightsAxis.overrideMax = 100;
+    // Y Axis
+    var flightsAxis = myChart.addMeasureAxis("y", "OnTimePercent");
+    flightsAxis.title = "On-Time Percent";
+    flightsAxis.fontSize = "12px";
+    flightsAxis.overrideMax = 100;
 
 
-	    myChart.addSeries(null, dimple.plot.bar)
+    myChart.addSeries(null, dimple.plot.bar)
 
-	    myChart.series[0].tooltipFontSize="12px";
+    myChart.series[0].tooltipFontSize="12px";
 
-	    // Now refresh the chart
-	    myChart.draw(500,false);
+    // Now refresh the chart
+    myChart.draw(500,false);
 
-	    // Update the maximum Y axis value (for zoom calculations)
-	    originalYMax = myChart.axes[1]._max;
+    // Update the maximum Y axis value (for zoom calculations)
+    originalYMax = myChart.axes[1]._max;
 
-    }
+}
 
