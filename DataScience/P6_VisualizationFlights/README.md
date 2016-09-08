@@ -102,9 +102,17 @@ To address these issues, I added the following features:
 4. Added a zoom slider control so that readers can zoom into a chart (reduce the scale) to see smaller airlines.
 5. Added a new "All Airports" airport option and made this the default. The visualization now starts off with data on all flights departing from all top 10 airports.
 
-Here is a link to a Plunker URL that hosts the final code:
+Here is a link to a Plunker URL that hosts the 1st submission code:
 
-[Final Draft](https://plnkr.co/edit/guZWcsDBUdvZvm8dAfWE?p=preview)
+[1st Submission](https://plnkr.co/edit/guZWcsDBUdvZvm8dAfWE?p=preview)
+
+After the 1st submission I added a narrative feature and a new OnTime Percents chart to visualization. Readers can now switch between a view of flight counts or a view of on-time percentage. This new view is extremely useful when comparing large and small carriers.
+
+The narrative appears on the top of the page with a blue background. During testing, I found that a long narrative is annoying if a user cannot exit the narrative and access the visualization immediately. Instead, I offer the reader a choice to hide the narrative (and freely explore the data) or page through the text. 
+
+Here is a link to a Plunker URL that hosts the 2nd submission code.
+
+[2nd Submission](https://plnkr.co/edit/HKbjNBnWf4FOxBQQy8Ap?p=preview)
 
 ## Resources
 
