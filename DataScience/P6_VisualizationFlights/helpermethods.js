@@ -31,10 +31,12 @@ function initializePage() {
 
 		// Now that flight data is loaded, also load narrative script data
 		var xmlhttp = new XMLHttpRequest();
-		var url = "data/narrative.json";
+		var url = "./data/narrative.json";
 
 		xmlhttp.onreadystatechange = function() {
-    		if (this.readyState == 4 && this.status == 200) {
+			// console.log("ReadyState = " + this.readyState);
+			// console.log("Status = " + this.status);
+    		if (this.readyState == 4) {
 	        	narrativeScript = JSON.parse(this.responseText);
 	        	// Narrative script is loaded. Render page 1.
 			  	renderNarrative(1);
@@ -97,11 +99,11 @@ function renderNarrative(pageNumber) {
 		storyDiv.innerHTML += `Page ${pageNumber}/${narrativeScript.length}<br>`;
 		buttonsDiv.innerHTML = "";
 		// if (pageNumber > 1) {
+		buttonsDiv.innerHTML += `<button id="HideNarrative" onclick="narrativeHiddenStatus = true;renderNarrative(${pageNumber});return false;">Hide Narrative</a>`;
 		const disabledPrevious = (pageNumber === 1) ? "disabled" : "";
 		buttonsDiv.innerHTML += `<button id="NarrativePreviousPage" onClick="renderNarrative(${pageNumber - 1});return false;" ${disabledPrevious}>Previous</button>&nbsp;`;
 		const disabledNext = (pageNumber === narrativeScript.length) ? "disabled" : "";
 		buttonsDiv.innerHTML += `<button id="NarrativeNextPage" onClick="renderNarrative(${pageNumber + 1});return false;" ${disabledNext}>Next</button>`;
-		buttonsDiv.innerHTML += `<button id="HideNarrative" onclick="narrativeHiddenStatus = true;renderNarrative(${pageNumber});return false;">Hide Narrative</a>`;
 	    d3.select("#airport").property("value", scriptDetails['airport']);
 	    d3.select("#timeframe").property("value", scriptDetails['timeframe']);
 	    const chartMode = scriptDetails['chartmode'];

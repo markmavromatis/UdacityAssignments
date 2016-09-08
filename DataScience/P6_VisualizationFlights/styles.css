@@ -1,11 +1,11 @@
 div.story-visible {
 	background-color: lightblue;
-	height: 10em; // 4 lines
+	height: 10em; 
 }
 
 div.story-invisible {
 	background-color: lightblue;
-	height: 0em; // 4 lines
+	height: 0em;
 }
 
 div.disabled {
