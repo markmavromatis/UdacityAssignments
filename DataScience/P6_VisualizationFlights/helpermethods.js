@@ -29,12 +29,14 @@ function initializePage() {
 		console.log("Loaded flight data.");
 		updateChart();
 
+		// Now that flight data is loaded, also load narrative script data
 		var xmlhttp = new XMLHttpRequest();
 		var url = "data/narrative.json";
 
 		xmlhttp.onreadystatechange = function() {
     		if (this.readyState == 4 && this.status == 200) {
 	        	narrativeScript = JSON.parse(this.responseText);
+	        	// Narrative script is loaded. Render page 1.
 			  	renderNarrative(1);
 	    	}
 		};
@@ -249,10 +251,6 @@ function filterData() {
 		selectedTimeframe = selectedTimeframe.substring(5);
 	}
 
-	// console.log("# of flight records: " + FLIGHT_DATA_2015.length);
-	// console.log("Selected airport = " + selectedAirport);
-	// console.log("Selected timeframe = " + selectedTimeframe);
-
 	var filteredData = FLIGHT_DATA_2015.filter(function(row) {
 		const airportMatch = selectedAirport === "000" || selectedAirport === row['Origin'];
 		const timeframeMatch = selectedTimeframe === "annual" || selectedTimeframe === row['Month'];
@@ -310,7 +308,6 @@ function prepareOnTimePercentData(flightData) {
 		}
 
 	}
-	console.log("Carrier data length: " + carrierData.length);
 	const airlineOnTimePercentages = [];
 	const carrierDataKeys = Object.keys(carrierData);
 
@@ -328,7 +325,6 @@ function prepareOnTimePercentData(flightData) {
 		newRow['OnTimePercent'] = Math.round(onTimePercent * 100, 2);
 		results.push(newRow);
 
-		console.log(`${newRow['CarrierName']}     ${newRow['OnTimeFlights']}     ${totalCount}    ${onTimePercent}`)
 	}
 	return results;
 }
