@@ -29,12 +29,18 @@ function initializePage() {
 		console.log("Loaded flight data.");
 		updateChart();
 
-		// Now load narrative text from the data file
-		var request = new XMLHttpRequest();
-   		request.open("GET", "data/narrative.json", false);
-   		request.send(null)
-   		narrativeScript = JSON.parse(request.responseText);
-	  	renderNarrative(1);
+		var xmlhttp = new XMLHttpRequest();
+		var url = "data/narrative.json";
+
+		xmlhttp.onreadystatechange = function() {
+    		if (this.readyState == 4 && this.status == 200) {
+	        	narrativeScript = JSON.parse(this.responseText);
+			  	renderNarrative(1);
+	    	}
+		};
+		xmlhttp.open("GET", url, true);
+		xmlhttp.send();
+
 
 	})
 
@@ -247,7 +253,7 @@ function filterData() {
 	// console.log("Selected airport = " + selectedAirport);
 	// console.log("Selected timeframe = " + selectedTimeframe);
 
-	const filteredData = FLIGHT_DATA_2015.filter(function(row) {
+	var filteredData = FLIGHT_DATA_2015.filter(function(row) {
 		const airportMatch = selectedAirport === "000" || selectedAirport === row['Origin'];
 		const timeframeMatch = selectedTimeframe === "annual" || selectedTimeframe === row['Month'];
 		return airportMatch && timeframeMatch;
